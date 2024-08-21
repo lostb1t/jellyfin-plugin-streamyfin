@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Streamyfin</title>
+    <link href="https://cdn.jsdelivr.net/npm/vscode-codicons@0.0.17/dist/codicon.min.css" rel="stylesheet">
+    <!-- <script id="mnjs" src="https://cdn.jsdelivr.net/npm/monaco-yaml-prebuilt@1.0.0/dist/monaco-editor.min.js"></script> -->
+    
+    
+</head>
+<body>
+<div data-role="page" id="StreamyfinConfigPage" class="page type-interior pluginConfigurationPage fullWidthContent">
+    <div class="content-primary">
+        <div class="verticalSection">
+            <div class="sectionTitleContainer">
+                <h2 class="sectionTitle">Collection Import</h2>
+                <a is="emby-linkbutton" class="raised raised-mini" style="margin-left: 2em;" target="_blank"
+                    href="https://github.com/jellyfin/jellyfin-plugin-artwork">
+                    <i class="md-icon button-icon button-icon-left secondaryText"></i>
+                    <span>Help</span>
+                </a>
+            </div>
+        </div>
+
+                <form>
+            <button id="saveConfig" is="emby-button" type="submit" class="raised button-submit block">
+                <span>Save</span>
+            </button>
+        </form>
+        
+        <div id="yamleditor" style="width: 800px; height: 600px; border: 1px solid grey"></div>
+
+    </div>
+
+<!-- <script id="mnjs" src="https://cdn.jsdelivr.net/npm/monaco-yaml-prebuilt@1.0.0/dist/monaco-editor.min.js"></script> -->
+<!-- <script id="mnjs" src="https://unpkg.com/@skrashevich/monaco-yaml-prebuilt@1.1.2/dist/monaco-editor.bundle.js"></script> -->
+<script type="module" src="configurationpage?name=config.js"></script>
+    <script type="text/javascript">
+      //alert("hello");
+      
+      //import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/+esm';
+            //if (typeof Streamyfin == 'undefined') {
+    //        var editor = window.monaco.editor.create(document.getElementById('yamleditor'), {
+
+		//		language: 'yaml'
+			//});
+      
+    
+      
+  //import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/+esm';
+
+ // window.editor = monaco.editor.create(document.querySelector('#monaco'),{
+ //   language: 'yaml'
+ // }
+ // );
+</script>
+ </div>
+
+</body>
+</html>

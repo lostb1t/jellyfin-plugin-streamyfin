@@ -1,0 +1,1 @@
+Streamyfin compagnion plugin

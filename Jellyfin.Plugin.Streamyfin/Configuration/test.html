@@ -1,0 +1,63 @@
+   <script type="text/javascript">
+      if (typeof Streamyfin == 'undefined') {
+        
+      //var editor = window.monaco.editor.create(document.getElementById('monaco'), {
+			//	value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+			//	language: 'yaml'
+			//});
+        const Streamyfin = {
+            pluginId: "1e9e5d38-6e67-4615-8719-e98a5c34f004",
+            //configurationWrapper: document.querySelector("#configurationWrapper"),
+            //editor: null,
+            btnSave: document.querySelector("#saveConfig"),
+
+            saveConfig: function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                const config = {
+                    Config: []
+                };
+
+                alert(window.editor.getModel().getValue());
+                
+
+                window.ApiClient.updatePluginConfiguration(Streamyfin.pluginId, config)
+                    .then(Dashboard.processPluginConfigurationUpdateResult)
+                    .catch(function (error) {
+                        console.error(error);
+                    })
+                    .finally(function () {
+                        Dashboard.hideLoadingMsg();
+                    });
+            },
+            loadConfig: function () {
+                Dashboard.showLoadingMsg();
+                window.ApiClient.getPluginConfiguration(Streamyfin.pluginId)
+                    .then(function (config) {
+                      //monaco.value = "hello";
+                      //window.monaco.getModel().setValue('some value');
+                        //console.log(config);
+                        //for (let i = 0; i < config.ImportSets.length; i++) {
+                        //    CollectionImport.addSet(config.ImportSets[i]);
+                       // }
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    })
+                    .finally(function () {
+                        Dashboard.hideLoadingMsg();
+                    });
+            },
+            init: function () {
+                console.log("init");
+                Streamyfin.loadConfig();
+                Streamyfin.btnSave.addEventListener("click", Streamyfin.saveConfig);
+            }
+        }
+
+        // view.addEventListener("viewshow", function (e) {
+        document.querySelector('#StreamyfinConfigPage').addEventListener("pageshow", function () {
+            Streamyfin.init();
+        });
+      }
+    </script>
