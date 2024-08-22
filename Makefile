@@ -1,9 +1,6 @@
-export VERSION := 0.4
+export VERSION := 0.5
 export GITHUB_REPO := lostb1t/jellyfin-plugin-streamyfin
 export FILE := streamyfin-${VERSION}.zip
-
-build: 
-	dotnet build
 
 zip:
 	zip "${FILE}" Jellyfin.Plugin.Streamyfin/bin/Debug/net8.0/Jellyfin.Plugin.Streamyfin.dll YamlDotNet.dll
@@ -18,12 +15,17 @@ create-tag:
 create-gh-release:
 	gh release create ${VERSION} "${FILE}" --generate-notes --verify-tag
 
-update-files:
+update-version:
 	node scripts/update-version.js
+  
+update-manifest:
 	node scripts/validate-and-update-manifest.js
 
+build: 
+	dotnet build
+  
 push-manifest:
 	git commit -m 'new release' manifest.json
 	git push origin main
 
-release: build zip create-tag create-gh-release update-files push-manifest
+release: update-version build zip create-tag create-gh-release update-manifest push-manifest
