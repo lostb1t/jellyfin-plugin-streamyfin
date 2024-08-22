@@ -1,12 +1,12 @@
-export VERSION := 0.1
-export GITHUB_REPO := lostb1t/jellyfin-plugin-Streamyfin
-export FILE := Streamyfin-${VERSION}.zip
+export VERSION := 0.3
+export GITHUB_REPO := lostb1t/jellyfin-plugin-streamyfin
+export FILE := streamyfin-${VERSION}.zip
 
 build: 
 	dotnet build
 
 zip:
-	zip "${FILE}" Jellyfin.Plugin.Streamyfin/bin/Debug/net8.0/Jellyfin.Plugin.Streamyfin.dll 
+	zip "${FILE}" Jellyfin.Plugin.Streamyfin/bin/Debug/net8.0/Jellyfin.Plugin.Streamyfin.dll YamlDotNet.dll
 
 csum:
 	md5sum "${FILE} ""

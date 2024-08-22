@@ -3,9 +3,9 @@ const fs = require('fs');
 const VERSION = process.env.VERSION;
 
 // Read csproj
-const csprojPath = './Jellyfin.Plugin.CollectionImport/Jellyfin.Plugin.CollectionImport.csproj';
+const csprojPath = './Jellyfin.Plugin.Streamyfin/Jellyfin.Plugin.Streamyfin.csproj';
 if (!fs.existsSync(csprojPath)) {
-    console.error('Jellyfin.Plugin.CollectionImport.csproj file not found');
+    console.error('Jellyfin.Plugin.Streamyfin.csproj file not found');
     process.exit(1);
 }
 

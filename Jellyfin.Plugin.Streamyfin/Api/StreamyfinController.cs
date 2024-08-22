@@ -11,11 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-// using Jellyfin.Api.Attributes;
-// using Jellyfin.Api.Extensions;
-// using Jellyfin.Api.Helpers;
-// using Jellyfin.Api.ModelBinders;
-// using Jellyfin.Api.Models.LibraryDtos;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 using Jellyfin.Data.Entities;
 using Jellyfin.Data.Enums;
 using Jellyfin.Extensions;
@@ -40,8 +37,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Jellyfin.Plugin.Streamyfin.Configuration;
 
 namespace Jellyfin.Plugin.Streamyfin.Api;
+
+public class ConfigYamlRes {
+  public string Value { get; set; } = default!;
+}
+
+public class ConfigSaveResponse {
+  public bool Error { get; set; }
+  public string Message { get; set; } = default!;
+}
+
+//public class ConfigYamlReq {
+//  public string? Value { get; set; }
+//}
 
 /// <summary>
 /// CollectionImportController.
@@ -49,7 +60,7 @@ namespace Jellyfin.Plugin.Streamyfin.Api;
 [ApiController]
 //[Authorize(Policy = "DefaultAuthorization")]
 [Authorize]
-[Route("collectionimport")]
+[Route("streamyfin")]
 // [Produces(MediaTypeNames.Application.Json)]
 public class StreamyfinController : ControllerBase
 {
@@ -80,21 +91,65 @@ public class StreamyfinController : ControllerBase
         _logger.LogInformation("StreamyfinController Loaded");
     }
 
-    // public class Data
-    // {
-    //     public string test { get; set; } = "";
-    // }
-
-    /// <summary>
-    /// Returns home lists.
-    /// </summary>
-    [HttpGet("items")]
+    [HttpPost("config/yaml")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     // public ActionResult<Dictionary<string, string>> Home()
-    public ActionResult<string> Home(
+    public ActionResult<ConfigSaveResponse> saveConfig(
+      [FromBody, Required] ConfigYamlRes config
     )
     {
-      return "";
+      //Console.WriteLine(config.Value);
+      //var config = StreamyfinPlugin.Instance!.Configuration.Config;
+      var deserializer = new DeserializerBuilder()
+        .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml 
+        .Build();
+
+      Config p;
+      try 
+      {
+        p = deserializer.Deserialize<Config>(config.Value);
+      }  
+      catch (Exception e)
+      {
+
+        return new ConfigSaveResponse{Error = true, Message = e.ToString()};
+      }     
+      
+      var c = StreamyfinPlugin.Instance!.Configuration;
+      c.Config = p;
+      StreamyfinPlugin.Instance!.UpdateConfiguration(c);
+
+      return new ConfigSaveResponse{Error = false};
+    }
+    
+    [HttpGet("config")]
+    //[Produces("text/yaml")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    // public ActionResult<Dictionary<string, string>> Home()
+    public ActionResult<Config> getConfig(
+    )
+    {
+      var config = StreamyfinPlugin.Instance!.Configuration.Config;
+      return config;
+    }
+    
+    //[HttpGet("config.yaml")]
+    [HttpGet("config/yaml")]
+    //[Produces("application/x-yaml")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    // public ActionResult<Dictionary<string, string>> Home()
+    public ActionResult<ConfigYamlRes> getConfigYaml(
+    )
+    {
+      var config = StreamyfinPlugin.Instance!.Configuration.Config;
+      var serializer = new SerializerBuilder()
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .Build();
+      var yaml = serializer.Serialize(config);
+      //return yaml;
+      return new ConfigYamlRes{Value = yaml};
     }
 }

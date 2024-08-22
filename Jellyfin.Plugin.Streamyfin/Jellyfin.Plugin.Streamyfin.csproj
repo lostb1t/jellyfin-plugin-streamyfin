@@ -2,8 +2,8 @@
 <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.Streamyfin</RootNamespace>
-    <AssemblyVersion>0.1</AssemblyVersion>
-    <FileVersion>0.1</FileVersion>
+    <AssemblyVersion>0.3</AssemblyVersion>
+    <FileVersion>0.3</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
@@ -16,6 +16,7 @@
     <PackageReference Include="Jellyfin.Model" Version="10.9.9" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
+    <PackageReference Include="YamlDotNet" Version="16.0.0" />
     <!-- <PackageReference Include="ObjectDumper.NET" Version="4.2.7" /> -->
     <!-- <PackageReference Include="System.Security.Claims" Version="8.0.0" /> -->
     <!-- <PackageReference Include="Jellyfin.Sdk" Version="2024.8.15-unstable.202408150049" /> -->

@@ -24,29 +24,53 @@ if (typeof Streamyfin == 'undefined') {
             e.preventDefault();
             Dashboard.showLoadingMsg();
             const config = {
-                Yaml: editor.getModel().getValue()
+                Value: editor.getModel().getValue()
             };
 
             //alert(window.editor.getModel().getValue());
-                
+            const url = window.ApiClient.getUrl('streamyfin/config/yaml');
+            const data = JSON.stringify(config);
+            console.log(data);
+            //window.ApiClient.getPluginConfiguration(Streamyfin.pluginId)
+            window.ApiClient.ajax({ type: 'POST', url, data, contentType: 'application/json'})
+                .then(function(response) {
+                  response.json().then(res => {
+                    if (res.Error == true) {
+                      Dashboard.hideLoadingMsg();
+                      Dashboard.alert(res.Message);
+                      //response.statusText = res.Message;
+                      //Dashboard.processErrorResponse(response);
+                    } else {
+                        Dashboard.processPluginConfigurationUpdateResult();
+                    }
+                  })
+                }
+                  //processErrorResponse
 
-            window.ApiClient.updatePluginConfiguration(Streamyfin.pluginId, config)
-                .then(Dashboard.processPluginConfigurationUpdateResult)
+                )
                 .catch(function (error) {
+                   //alert(error);
                     console.error(error);
                 })
                 .finally(function () {
                     Dashboard.hideLoadingMsg();
                 });
+                
         },
         loadConfig: function () {
             Dashboard.showLoadingMsg();
-            window.ApiClient.getPluginConfiguration(Streamyfin.pluginId)
-                .then(function (config) {
+            const url = window.ApiClient.getUrl('streamyfin/config/yaml');
+            //window.ApiClient.getPluginConfiguration(Streamyfin.pluginId)
+            window.ApiClient.ajax({ type: 'GET', url, contentType: 'application/json'})
+                .then(function (response) {
+                  response.json().then(res => {
                     //monaco.value = "hello";
                     //console.log(config);
                     //console.log(config.Yaml);
-                    editor.getModel().setValue(config.Yaml);
+                    //const data = JSON.stringify({ Username: username, Password: password });
+                    //const yaml = window.ApiClient.getUrl('streamyfin/config/yaml');
+                    editor.getModel().setValue(res.Value);
+                  })
                     //console.log(config);
                     //for (let i = 0; i < config.ImportSets.length; i++) {
                     //    CollectionImport.addSet(config.ImportSets[i]);
