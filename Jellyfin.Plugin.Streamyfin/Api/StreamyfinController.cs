@@ -94,7 +94,7 @@ public class StreamyfinController : ControllerBase
     }
 
     [HttpPost("config/yaml")]
-    [Authorize]
+    [Authorize(Policy = Policies.RequiresElevation)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     // public ActionResult<Dictionary<string, string>> Home()
     public ActionResult<ConfigSaveResponse> saveConfig(
@@ -104,7 +104,7 @@ public class StreamyfinController : ControllerBase
       //Console.WriteLine(config.Value);
       //var config = StreamyfinPlugin.Instance!.Configuration.Config;
       var deserializer = new DeserializerBuilder()
-        .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml 
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
         .Build();
 
       Config p;
@@ -162,7 +162,7 @@ public class StreamyfinController : ControllerBase
     {
       var config = StreamyfinPlugin.Instance!.Configuration.Config;
       var serializer = new SerializerBuilder()
-    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)
     .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
     //.IgnoreUnmatchedProperties()
     .Build();

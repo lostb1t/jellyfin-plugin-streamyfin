@@ -4,18 +4,24 @@
 #pragma warning disable CS8603
 #pragma warning disable CS8714
 #pragma warning disable CA1002
+#pragma warning disable CA1819
 
 using System;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
+using Jellyfin.Data.Enums;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Xml.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Newtonsoft.Json.Serialization;
 
 namespace Jellyfin.Plugin.Streamyfin.Configuration;
 
+//[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
 public class Config
 {
   public Config()
@@ -23,8 +29,8 @@ public class Config
     //search = Array.Empty<string>();
   }
 
-  public Search? MarlinSearch { get; set; }
-  public Home? Home { get; set; }
+  public Search? marlinSearch { get; set; }
+  public Home? home { get; set; }
 }
 
 public class Search
@@ -35,8 +41,8 @@ public class Search
   //  Url = "";
   //}
   
-  public bool Enabled { get; set; }
-  public string? Url { get; set; }
+  public bool enabled { get; set; }
+  public string? url { get; set; }
 }
 
 public class Home
@@ -47,7 +53,7 @@ public class Home
   //  Url = "";
   //}
   //public string? SortBy { get; set; }
-  public SerializableDictionary<string, Section>? Sections { get; set; }
+  public SerializableDictionary<string, Section>? sections { get; set; }
 }
 
 public class Section
@@ -58,9 +64,9 @@ public class Section
   //  Url = "";
   //}
 
-  public SectionStyle? Style { get; set; }
-  public SectionType? Type { get; set; }
-  public SectionItemResolver? Items { get; set; }
+  public SectionStyle? style { get; set; }
+  public SectionType? type { get; set; }
+  public SectionItemResolver? items { get; set; }
 }
 
 public enum SectionStyle
@@ -83,8 +89,9 @@ public class SectionItemResolver
 
 public class ItemArgs
 {
-  public string? sortBy { get; set; }
-  public string? sortOrder { get; set; }
+  //[EnumDataType(typeof(ItemSortBy))]
+  public ItemSortBy[]? sortBy { get; set; }
+  public SortOrder[]? sortOrder { get; set; }
   [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections)]
   public List<string>? genres { get; set; }
   public string? parentId { get; set; }

@@ -20,24 +20,24 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     { 
       Config = new Config{
-        MarlinSearch = new Search{
-          Enabled = false,
-          Url = ""
+        marlinSearch = new Search{
+          enabled = false,
+          url = ""
         },
-        Home = new Home{
-          Sections = new SerializableDictionary<string, Section>
+        home = new Home{
+          sections = new SerializableDictionary<string, Section>
         {
             { "Anime", new Section{
-              Style = SectionStyle.portrait,
-              Type = SectionType.row,
-              Items = new SectionItemResolver{ args =new ItemArgs{
+              style = SectionStyle.portrait,
+              type = SectionType.row,
+              items = new SectionItemResolver{ args = new ItemArgs{
                genres = new List<string>{"Anime"}
               }
             } } },
             { "Trending collection", new Section{
-              Style = SectionStyle.portrait,
-              Type = SectionType.carousel,
-              Items = new SectionItemResolver 
+              style = SectionStyle.portrait,
+              type = SectionType.carousel,
+              items = new SectionItemResolver 
                 {args = new ItemArgs{
                 parentId = "YOURCOLLECTIONID"
               } } } }
