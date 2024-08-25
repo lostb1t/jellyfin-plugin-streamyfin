@@ -42,6 +42,7 @@ home:
 ";
       
         var deserializer = new DeserializerBuilder()
+        //.ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
         .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
         .Build();
 

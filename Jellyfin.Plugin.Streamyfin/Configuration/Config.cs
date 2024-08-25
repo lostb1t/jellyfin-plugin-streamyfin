@@ -89,7 +89,7 @@ public class ItemArgs
   //[EnumDataType(typeof(ItemSortBy))]
   public ItemSortBy[]? sortBy { get; set; }
   public SortOrder[]? sortOrder { get; set; }
-  [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections)]
+  //[YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections)]
   public List<string>? genres { get; set; }
   public string? parentId { get; set; }
   public string[]? filters { get; set; }
