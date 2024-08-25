@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
 using System.Diagnostics.CodeAnalysis;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Jellyfin.Plugin.Streamyfin.Configuration;
 
@@ -19,6 +21,34 @@ public class PluginConfiguration : BasePluginConfiguration
   
     public PluginConfiguration()
     { 
+      
+      var Yaml = @"
+home:
+  sections:
+    Trending:
+      style: portrait
+      type: row 
+      items:
+        args: 
+          parentId: YOURCOLLECTIONID
+    Continue Watching:
+      style: landscape
+      type: row 
+      items:
+        args:
+          recursive: true
+          filters:
+            - isResumable       
+";
+      
+        var deserializer = new DeserializerBuilder()
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
+        .Build();
+
+
+      Config = deserializer.Deserialize<Config>(Yaml);
+        
+      /*
       Config = new Config{
         marlinSearch = new Search{
           enabled = false,
@@ -27,23 +57,32 @@ public class PluginConfiguration : BasePluginConfiguration
         home = new Home{
           sections = new SerializableDictionary<string, Section>
         {
+           { "Trending collection", new Section{
+              style = SectionStyle.portrait,
+              type = SectionType.carousel,
+              items = new SectionItemResolver 
+                {args = new ItemArgs{
+                parentId = "YOURCOLLECTIONID"
+              } } } ,
+            { "Continue Watching", new Section{
+              style = SectionStyle.portrait,
+              type = SectionType.carousel,
+              items = new SectionItemResolver 
+                {args = new ItemArgs{
+                filters = "YOURCOLLECTIONID"
+              } } },
             { "Anime", new Section{
               style = SectionStyle.portrait,
               type = SectionType.row,
               items = new SectionItemResolver{ args = new ItemArgs{
                genres = new List<string>{"Anime"}
               }
-            } } },
-            { "Trending collection", new Section{
-              style = SectionStyle.portrait,
-              type = SectionType.carousel,
-              items = new SectionItemResolver 
-                {args = new ItemArgs{
-                parentId = "YOURCOLLECTIONID"
-              } } } }
+            } } } }
         }
         }
+        
       };
+      */
       //Yaml
       /* 
     SfConfig = "test";
