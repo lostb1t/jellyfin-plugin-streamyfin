@@ -23,7 +23,7 @@ public class Config
     //search = Array.Empty<string>();
   }
 
-  public Search? Search { get; set; }
+  public Search? MarlinSearch { get; set; }
   public Home? Home { get; set; }
 }
 

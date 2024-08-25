@@ -162,7 +162,7 @@ public class StreamyfinController : ControllerBase
     {
       var config = StreamyfinPlugin.Instance!.Configuration.Config;
       var serializer = new SerializerBuilder()
-    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .WithNamingConvention(UnderscoredNamingConvention.Instance)
     .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
     //.IgnoreUnmatchedProperties()
     .Build();

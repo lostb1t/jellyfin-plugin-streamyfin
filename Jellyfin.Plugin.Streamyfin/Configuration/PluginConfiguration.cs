@@ -20,7 +20,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     { 
       Config = new Config{
-        Search = new Search{
+        MarlinSearch = new Search{
           Enabled = false,
           Url = ""
         },
