@@ -1,5 +1,6 @@
 #pragma warning disable CA2227
 #pragma warning disable CS0219
+
 using System;
 using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
@@ -22,6 +23,25 @@ public class PluginConfiguration : BasePluginConfiguration
         Search = new Search{
           Enabled = false,
           Url = ""
+        },
+        Home = new Home{
+          Sections = new SerializableDictionary<string, Section>
+        {
+            { "Anime", new Section{
+              Style = SectionStyle.portrait,
+              Type = SectionType.row,
+              Items = new SectionItemResolver{ args =new ItemArgs{
+               genres = new List<string>{"Anime"}
+              }
+            } } },
+            { "Trending collection", new Section{
+              Style = SectionStyle.portrait,
+              Type = SectionType.carousel,
+              Items = new SectionItemResolver 
+                {args = new ItemArgs{
+                parentId = "YOURCOLLECTIONID"
+              } } } }
+        }
         }
       };
       //Yaml

@@ -38,6 +38,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Jellyfin.Plugin.Streamyfin.Configuration;
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Schema.Generation;
 
 namespace Jellyfin.Plugin.Streamyfin.Api;
 
@@ -135,6 +137,20 @@ public class StreamyfinController : ControllerBase
       return config;
     }
     
+    [HttpGet("config/schema")]
+    //[Produces("text/yaml")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    // public ActionResult<Dictionary<string, string>> Home()
+    public ActionResult<JSchema> getConfigSchema(
+    )
+    {
+      //var config = StreamyfinPlugin.Instance!.Configuration.Config;
+      JSchemaGenerator generator = new JSchemaGenerator();
+      JSchema schema = generator.Generate(typeof(Config));
+      return schema;
+    }
+    
     //[HttpGet("config.yaml")]
     [HttpGet("config/yaml")]
     //[Produces("application/x-yaml")]
@@ -147,6 +163,8 @@ public class StreamyfinController : ControllerBase
       var config = StreamyfinPlugin.Instance!.Configuration.Config;
       var serializer = new SerializerBuilder()
     .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+    //.IgnoreUnmatchedProperties()
     .Build();
       var yaml = serializer.Serialize(config);
       //return yaml;
