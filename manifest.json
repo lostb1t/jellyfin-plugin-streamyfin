@@ -8,6 +8,14 @@
         "category": "General",
         "versions": [
             {
+                "version": "0.14",
+                "changelog": "- See the full changelog at [GitHub](https://github.com/lostb1t/jellyfin-plugin-streamyfin/releases/tag/0.14)\n",
+                "targetAbi": "10.9.9.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-streamyfin/releases/download/0.14/streamyfin-0.14.zip",
+                "checksum": "6403e63ad91cbadd9b36b805bd96f93f",
+                "timestamp": "2024-08-25T16:17:10Z"
+            },
+            {
                 "version": "0.13",
                 "changelog": "- See the full changelog at [GitHub](https://github.com/lostb1t/jellyfin-plugin-streamyfin/releases/tag/0.13)\n",
                 "targetAbi": "10.9.9.0",
