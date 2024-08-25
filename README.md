@@ -1,4 +1,4 @@
-## companion app for [Streamyfin](https://github.com/fredrikburmester/streamyfin)
+## Companion app for [Streamyfin](https://github.com/fredrikburmester/streamyfin)
 
 Allows centralised configuration of Streamyfin.
 
