@@ -7,8 +7,6 @@
 #pragma warning disable CA1819
 
 using System;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
 using Jellyfin.Data.Enums;
@@ -21,7 +19,6 @@ using Newtonsoft.Json.Serialization;
 
 namespace Jellyfin.Plugin.Streamyfin.Configuration;
 
-//[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
 public class Config
 {
   public Config()
