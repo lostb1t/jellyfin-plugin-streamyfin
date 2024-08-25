@@ -1,6 +1,6 @@
-## Compagnion app for [Streamyfin](https://github.com/fredrikburmester/streamyfin)
+## companion app for [Streamyfin](https://github.com/fredrikburmester/streamyfin)
 
-Allows centralised configuration of  Streamyfin.
+Allows centralised configuration of Streamyfin.
 
 Config example:
 
@@ -16,3 +16,5 @@ home:
           sortOrder: Ascending
           filterByGenre: [""Anime"", ""Comics""]";
 ```
+
+repo url: https://raw.githubusercontent.com/lostb1t/jellyfin-plugin-streamyfin/main/manifest.json
