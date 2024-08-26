@@ -20,7 +20,7 @@ window.MonacoEnvironment = {
 // 	// value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
 // 	language: 'yaml'
 // });
-const yamlModelUri = monaco.Uri.parse('a://b/foo.yaml');
+const yamlModelUri = monaco.Uri.parse('streamyfin.yaml');
 
 const monacoYaml = configureMonacoYaml(monaco, {
 	enableSchemaRequest: true,
@@ -30,30 +30,21 @@ const monacoYaml = configureMonacoYaml(monaco, {
 	format: true,
 	schemas: [
 		{
-			uri: '/streamyfin/config.yaml',
+			uri: '/streamyfin/config/schema',
 			fileMatch: ["*"],
 		},
 	],
 });
 
 monaco.editor.setTheme('vs-dark');
-const editor = monaco.editor.create(document.getElementById('yamleditor'), {
-	automaticLayout: true,
-	language: 'yaml',
-	quickSuggestions: {
-		other: true,
-		comments: false,
-		strings: true
-	},
-	model: monaco.editor.createModel('', 'yaml', yamlModelUri),
-});
+
 
 const Streamyfin = {
 	pluginId: "1e9e5d38-6e67-4615-8719-e98a5c34f004",
 	//configurationWrapper: document.querySelector("#configurationWrapper"),
 	//editor: null,
 	btnSave: document.querySelector("#saveConfig"),
-
+  editor: null,
 	saveConfig: function (e) {
 		e.preventDefault();
 		Dashboard.showLoadingMsg();
@@ -99,11 +90,21 @@ const Streamyfin = {
 			.then(function (response) {
 				response.json().then(res => {
 					//monaco.value = "hello";
-					console.log(res);
+					//console.log(res);
 					//console.log(config.Yaml);
 					//const data = JSON.stringify({ Username: username, Password: password });
 					//const yaml = window.ApiClient.getUrl('streamyfin/config/yaml');
-					editor.getModel().setValue(res.Value);
+					//editor.getModel().setValue(res.Value);
+          Streamyfin.editor = monaco.editor.create(document.getElementById('yamleditor'), {
+	automaticLayout: true,
+	language: 'yaml',
+	quickSuggestions: {
+		other: true,
+		comments: false,
+		strings: true
+	},
+	model: monaco.editor.createModel(res.Value, 'yaml', yamlModelUri),
+});
 				})
 				//console.log(config);
 				//for (let i = 0; i < config.ImportSets.length; i++) {
