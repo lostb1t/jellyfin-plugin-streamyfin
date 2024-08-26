@@ -50,5 +50,22 @@ public class StreamyfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
                  Name = "config.js",
                  EmbeddedResourcePath = prefix + ".Configuration.monaco.dist.config.js"
              };
+             
+             yield return new PluginPageInfo
+             {
+                 Name = "0.config.js",
+                 EmbeddedResourcePath = prefix + ".Configuration.monaco.dist.0.config.js"
+             };
+             
+             yield return new PluginPageInfo
+             {
+                 Name = "vendors-node_modules_monaco-editor_esm_vs_editor_editor_worker_js.config.js",
+                 EmbeddedResourcePath = prefix + ".Configuration.monaco.dist.vendors-node_modules_monaco-editor_esm_vs_editor_editor_worker_js.config.js"
+             };
+             yield return new PluginPageInfo
+             {
+                 Name = "vendors-node_modules_monaco-yaml_yaml_worker_js.config.js",
+                 EmbeddedResourcePath = prefix + ".Configuration.monaco.dist.vendors-node_modules_monaco-yaml_yaml_worker_js.config.js"
+             };
     }
 }

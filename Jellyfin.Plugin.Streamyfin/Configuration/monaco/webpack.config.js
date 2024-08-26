@@ -6,7 +6,8 @@ module.exports = {
 	entry: './index.js',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
-		filename: 'config.js'
+		filename: 'config.js',
+    publicPath: '/web/configurationpage?name='
 	},
 	devtool: 'inline-source-map',
 	resolve: {
