@@ -14,8 +14,10 @@
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.9.9" />
     <PackageReference Include="Jellyfin.Model" Version="10.9.9" />
+    <PackageReference Include="Namotion.Reflection" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1" />
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.16" />
+    <PackageReference Include="NJsonSchema" Version="11.0.2" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
     <PackageReference Include="YamlDotNet" Version="16.0.0" />
@@ -32,7 +34,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Configuration\config.html" />
-    <EmbeddedResource Include="Configuration\config.js" />
+    <!-- <EmbeddedResource Include="Configuration\config.js" /> -->
+    <EmbeddedResource Include="Configuration\monaco\dist\config.js" /> 
   </ItemGroup>
 
 </Project>

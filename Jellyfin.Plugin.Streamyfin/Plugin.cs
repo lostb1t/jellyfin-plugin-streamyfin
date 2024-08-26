@@ -48,7 +48,7 @@ public class StreamyfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
              yield return new PluginPageInfo
              {
                  Name = "config.js",
-                 EmbeddedResourcePath = prefix + ".Configuration.config.js"
+                 EmbeddedResourcePath = prefix + ".Configuration.monaco.dist.config.js"
              };
     }
 }

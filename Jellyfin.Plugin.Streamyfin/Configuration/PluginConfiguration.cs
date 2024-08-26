@@ -16,13 +16,13 @@ namespace Jellyfin.Plugin.Streamyfin.Configuration;
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
 {
-    //public string Yaml { get; set; }
-    public Config Config { get; set; }
-  
-    public PluginConfiguration()
-    { 
-      
-      var Yaml = @"
+  //public string Yaml { get; set; }
+  public Config Config { get; set; }
+
+  public PluginConfiguration()
+  {
+
+    var Yaml = @"
 home:
   sections:
     Trending:
@@ -38,66 +38,70 @@ home:
         args:
           recursive: true
           filters:
-            - isResumable       
-";
-      
-        var deserializer = new DeserializerBuilder()
-        //.ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
-        .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
-        .Build();
-
-
-      Config = deserializer.Deserialize<Config>(Yaml);
-        
-      /*
-      Config = new Config{
-        marlinSearch = new Search{
-          enabled = false,
-          url = ""
-        },
-        home = new Home{
-          sections = new SerializableDictionary<string, Section>
-        {
-           { "Trending collection", new Section{
-              style = SectionStyle.portrait,
-              type = SectionType.carousel,
-              items = new SectionItemResolver 
-                {args = new ItemArgs{
-                parentId = "YOURCOLLECTIONID"
-              } } } ,
-            { "Continue Watching", new Section{
-              style = SectionStyle.portrait,
-              type = SectionType.carousel,
-              items = new SectionItemResolver 
-                {args = new ItemArgs{
-                filters = "YOURCOLLECTIONID"
-              } } },
-            { "Anime", new Section{
-              style = SectionStyle.portrait,
-              type = SectionType.row,
-              items = new SectionItemResolver{ args = new ItemArgs{
-               genres = new List<string>{"Anime"}
-              }
-            } } } }
-        }
-        }
-        
-      };
-      */
-      //Yaml
-      /* 
-    SfConfig = "test";
-    Yaml = @"home:
-  sections:
-    Trending:
+            - isResumable
+    Suggestions:
       style: portrait
       type: row 
-      source: 
-        resolver: items
-        args: 
-          sortBy: AddedDate
-          sortOrder: Ascending
-          filterByGenre: [""Anime"", ""Comics""]";
-          */
-    }
+      suggestions:
+";
+
+    var deserializer = new DeserializerBuilder()
+    //.ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
+    .Build();
+
+
+    Config = deserializer.Deserialize<Config>(Yaml);
+
+    /*
+    Config = new Config{
+      marlinSearch = new Search{
+        enabled = false,
+        url = ""
+      },
+      home = new Home{
+        sections = new SerializableDictionary<string, Section>
+      {
+         { "Trending collection", new Section{
+            style = SectionStyle.portrait,
+            type = SectionType.carousel,
+            items = new SectionItemResolver 
+              {args = new ItemArgs{
+              parentId = "YOURCOLLECTIONID"
+            } } } ,
+          { "Continue Watching", new Section{
+            style = SectionStyle.portrait,
+            type = SectionType.carousel,
+            items = new SectionItemResolver 
+              {args = new ItemArgs{
+              filters = "YOURCOLLECTIONID"
+            } } },
+          { "Anime", new Section{
+            style = SectionStyle.portrait,
+            type = SectionType.row,
+            items = new SectionItemResolver{ args = new ItemArgs{
+             genres = new List<string>{"Anime"}
+            }
+          } } } }
+      }
+      }
+
+    };
+    */
+    //Yaml
+    /* 
+  SfConfig = "test";
+  Yaml = @"home:
+sections:
+  Trending:
+    style: portrait
+    type: row 
+    source: 
+      resolver: items
+      args: 
+        sortBy: AddedDate
+        sortOrder: Ascending
+        filterByGenre: [""Anime"", ""Comics""]";
+        */
+  }
 }

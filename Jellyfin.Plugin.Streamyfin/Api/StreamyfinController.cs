@@ -38,8 +38,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Jellyfin.Plugin.Streamyfin.Configuration;
-using Newtonsoft.Json.Schema;
-using Newtonsoft.Json.Schema.Generation;
+//using Newtonsoft.Json.Schema;
+//using Newtonsoft.Json.Schema.Generation;
+using NJsonSchema;
+using NJsonSchema.Generation;
 
 namespace Jellyfin.Plugin.Streamyfin.Api;
 
@@ -138,20 +140,24 @@ public class StreamyfinController : ControllerBase
     }
     
     [HttpGet("config/schema")]
-    //[Produces("text/yaml")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    // public ActionResult<Dictionary<string, string>> Home()
-    public ActionResult<JSchema> getConfigSchema(
+    public ActionResult<string> getConfigSchema(
     )
     {
-      //var config = StreamyfinPlugin.Instance!.Configuration.Config;
-      JSchemaGenerator generator = new JSchemaGenerator();
-      JSchema schema = generator.Generate(typeof(Config));
-      return schema;
+var settings = new SystemTextJsonSchemaGeneratorSettings();
+var generator = new JsonSchemaGenerator(settings);
+JsonSchema schema = generator.Generate(typeof(Config));
+      //Console.WriteLine(schema.ToString());
+     
+      //var schema = JsonSchema.FromType<Section>();
+     return schema.ToJson();
+     //JSchemaGenerator generator = new JSchemaGenerator();
+     //generator.GenerationProviders.Add(new StringEnumGenerationProvider());
+     // JSchema schema = generator.Generate(typeof(Config));
+     // return schema;
     }
     
-    //[HttpGet("config.yaml")]
     [HttpGet("config/yaml")]
     //[Produces("application/x-yaml")]
     [Authorize]
@@ -170,4 +176,26 @@ public class StreamyfinController : ControllerBase
       //return yaml;
       return new ConfigYamlRes{Value = yaml};
     }
+
+    // [HttpGet("config/yaml")]
+    [HttpGet("config.yaml")]
+    //[Produces("application/x-yaml")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    // public ActionResult<Dictionary<string, string>> Home()
+    public ActionResult<string> getConfigYamlTest(
+    )
+    {
+      var config = StreamyfinPlugin.Instance!.Configuration.Config;
+      var serializer = new SerializerBuilder()
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+    //.IgnoreUnmatchedProperties()
+    .Build();
+      var yaml = serializer.Serialize(config);
+    return yaml;
+      //return yaml;
+      // return new ConfigYamlRes{Value = yaml};
+    }
+
 }

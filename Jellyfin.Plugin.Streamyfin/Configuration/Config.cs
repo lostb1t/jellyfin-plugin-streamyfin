@@ -5,9 +5,11 @@
 #pragma warning disable CS8714
 #pragma warning disable CA1002
 #pragma warning disable CA1819
+#pragma warning disable CA1507
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using MediaBrowser.Model.Plugins;
 using Jellyfin.Data.Enums;
 using System.Diagnostics.CodeAnalysis;
@@ -15,19 +17,24 @@ using System.Text;
 using System.Xml.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Newtonsoft.Json.Serialization;
+//using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json.Converters;
+//using Newtonsoft.Json.Schema;
+using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.Streamyfin.Configuration;
 
 public class Config
 {
-  public Config()
-  {
-    //search = Array.Empty<string>();
-  }
-
+  //public Bla Wit { get; set; }
   public Search? marlinSearch { get; set; }
   public Home? home { get; set; }
+}
+
+public enum Bla
+{
+  yolo,
+  Another
 }
 
 public class Search
@@ -60,16 +67,22 @@ public class Section
   //  Enabled = false;
   //  Url = "";
   //}
-
+  
+  //[EnumDataType(typeof(SectionStyle))]
+  //[JsonConverter(typeof(StringEnumConverter))]
   public SectionStyle? style { get; set; }
   public SectionType? type { get; set; }
   public SectionItemResolver? items { get; set; }
+  [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
+  public SectionSuggestions? suggestions { get; set; } = null;
 }
 
+//[JsonConverter(typeof(StringEnumConverter))]
 public enum SectionStyle
 {
+    //[EnumMember(Value = "portrait")]
     portrait,
-    landscape,
+    landscape
 }
 
 public enum SectionType
@@ -94,6 +107,16 @@ public class ItemArgs
   public string? parentId { get; set; }
   public string[]? filters { get; set; }
   public bool? recursive { get; set; }
+}
+
+public class SectionSuggestions
+{
+  public SuggestionsArgs? args { get; set; }
+}
+
+public class SuggestionsArgs
+{
+  public BaseItemKind[]? type { get; set; }
 }
 
  [XmlRoot("dictionary")]

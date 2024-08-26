@@ -5,3 +5,5 @@ obj/
 artifacts
 Release
 *.zip
+node_modules
+dist/
