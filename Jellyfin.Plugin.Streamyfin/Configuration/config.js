@@ -2,25 +2,10 @@ function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-sleep(5000).then(async () => {
-
-    const yamlModelUri = monaco.Uri.parse('streamyfin.yaml');
-    monaco.editor.setTheme('vs-dark');
-
-
-    const monaco_yaml = monacoYaml.configureMonacoYaml(monaco, {
-        enableSchemaRequest: true,
-        hover: true,
-        completion: true,
-        validate: true,
-        format: true,
-        schemas: [
-            {
-                uri: location.origin + '/streamyfin/config/schema',
-                fileMatch: ["*"],
-            },
-        ],
-    });
+//sleep(5000).then(async () => {
+//var script = document.querySelector('#hljs');
+//  script.addEventListener('load', function() {
+if (typeof Streamyfin === 'undefined') {
 
     const Streamyfin = {
         pluginId: "1e9e5d38-6e67-4615-8719-e98a5c34f004",
@@ -100,11 +85,29 @@ sleep(5000).then(async () => {
                 });
         },
         init: function () {
+              const yamlModelUri = monaco.Uri.parse('streamyfin.yaml');
+    monaco.editor.setTheme('vs-dark');
+
+
+    const monaco_yaml = monacoYaml.configureMonacoYaml(monaco, {
+        enableSchemaRequest: true,
+        hover: true,
+        completion: true,
+        validate: true,
+        format: true,
+        schemas: [
+            {
+                uri: location.origin + '/streamyfin/config/schema',
+                fileMatch: ["*"],
+            },
+        ],
+    });
             //alert("yo");
             console.log("init");
             Streamyfin.loadConfig();
             Streamyfin.btnSave.addEventListener("click", Streamyfin.saveConfig);
         }
     }
-    Streamyfin.init();
-});
+   // Streamyfin.init();
+    //});
+}
