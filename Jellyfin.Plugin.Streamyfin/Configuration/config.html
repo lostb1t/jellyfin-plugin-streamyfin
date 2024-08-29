@@ -46,7 +46,7 @@
                     e.preventDefault();
                     Dashboard.showLoadingMsg();
                     const config = {
-                        Value: editor.getModel().getValue()
+                        Value: Streamyfin.editor.getModel().getValue()
                     };
 
                     const url = window.ApiClient.getUrl('streamyfin/config/yaml');
