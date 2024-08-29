@@ -45,10 +45,10 @@ public class StreamyfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 EmbeddedResourcePath = prefix + ".Configuration.config.html",
             };
 
-             yield return new PluginPageInfo
-             {
-                 Name = "config.js",
-                 EmbeddedResourcePath = prefix + ".Configuration.config.js"
-             };
+            //  yield return new PluginPageInfo
+            //  {
+            //      Name = "config.js",
+            //      EmbeddedResourcePath = prefix + ".Configuration.config.js"
+            //  };
     }
 }
