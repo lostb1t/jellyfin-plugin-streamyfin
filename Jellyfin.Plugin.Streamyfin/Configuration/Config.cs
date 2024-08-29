@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using MediaBrowser.Model.Plugins;
+using MediaBrowser.Model.Querying;
 using Jellyfin.Data.Enums;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -54,8 +55,6 @@ public class Section
 [JsonConverter(typeof(StringEnumConverter))]
 public enum SectionStyle
 {
-  //[EnumMember(Value = "portrait")]
-  // [System.Runtime.Serialization.EnumMember(Value = @"portrait")]
   portrait,
   landscape
 }
@@ -75,13 +74,14 @@ public class SectionItemResolver
 
 public class ItemArgs
 {
-  //[EnumDataType(typeof(ItemSortBy))]
+  [JsonConverter(typeof(StringEnumConverter))]
   public ItemSortBy[]? sortBy { get; set; }
+  [JsonConverter(typeof(StringEnumConverter))]
   public SortOrder[]? sortOrder { get; set; }
-  //[YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections)]
   public List<string>? genres { get; set; }
   public string? parentId { get; set; }
-  public string[]? filters { get; set; }
+  [JsonConverter(typeof(StringEnumConverter))]
+  public ItemFilter[]? filters { get; set; }
   public bool? recursive { get; set; }
 }
 
@@ -92,6 +92,7 @@ public class SectionSuggestions
 
 public class SuggestionsArgs
 {
+  [JsonConverter(typeof(StringEnumConverter))]
   public BaseItemKind[]? type { get; set; }
 }
 
