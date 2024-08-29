@@ -45,6 +45,15 @@ using NJsonSchema.Generation;
 
 namespace Jellyfin.Plugin.Streamyfin.Api;
 
+public class JsonStringResult : ContentResult
+{
+    public JsonStringResult(string json)
+    {
+        Content = json;
+        ContentType = "application/json";
+    }
+}
+
 public class ConfigYamlRes {
   public string Value { get; set; } = default!;
 }
@@ -63,7 +72,7 @@ public class ConfigSaveResponse {
 /// </summary>
 [ApiController]
 //[Authorize(Policy = "DefaultAuthorization")]
-[Authorize]
+// [Authorize]
 [Route("streamyfin")]
 // [Produces(MediaTypeNames.Application.Json)]
 public class StreamyfinController : ControllerBase
@@ -140,18 +149,19 @@ public class StreamyfinController : ControllerBase
     }
     
     [HttpGet("config/schema")]
-    [Authorize]
+    // [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<string> getConfigSchema(
+    public ActionResult getConfigSchema(
     )
     {
 var settings = new SystemTextJsonSchemaGeneratorSettings();
 var generator = new JsonSchemaGenerator(settings);
 JsonSchema schema = generator.Generate(typeof(Config));
+
       //Console.WriteLine(schema.ToString());
      
-      //var schema = JsonSchema.FromType<Section>();
-     return schema.ToJson();
+      // var schema = JsonSchema.FromType<Config>();
+     return new JsonStringResult(schema.ToJson());
      //JSchemaGenerator generator = new JSchemaGenerator();
      //generator.GenerationProviders.Add(new StringEnumGenerationProvider());
      // JSchema schema = generator.Generate(typeof(Config));

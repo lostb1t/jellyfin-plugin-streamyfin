@@ -31,45 +31,19 @@ public class Config
   public Home? home { get; set; }
 }
 
-public enum Bla
-{
-  yolo,
-  Another
-}
-
 public class Search
 {
-  //public Search()
-  //{
-  //  Enabled = false;
-  //  Url = "";
-  //}
-  
   public bool enabled { get; set; }
   public string? url { get; set; }
 }
 
 public class Home
 {
-  //public Search()
-  //{
-  //  Enabled = false;
-  //  Url = "";
-  //}
-  //public string? SortBy { get; set; }
   public SerializableDictionary<string, Section>? sections { get; set; }
 }
 
 public class Section
 {
-  //public Search()
-  //{
-  //  Enabled = false;
-  //  Url = "";
-  //}
-  
-  //[EnumDataType(typeof(SectionStyle))]
-  //[JsonConverter(typeof(StringEnumConverter))]
   public SectionStyle? style { get; set; }
   public SectionType? type { get; set; }
   public SectionItemResolver? items { get; set; }
@@ -77,18 +51,20 @@ public class Section
   public SectionSuggestions? suggestions { get; set; } = null;
 }
 
-//[JsonConverter(typeof(StringEnumConverter))]
+[JsonConverter(typeof(StringEnumConverter))]
 public enum SectionStyle
 {
-    //[EnumMember(Value = "portrait")]
-    portrait,
-    landscape
+  //[EnumMember(Value = "portrait")]
+  // [System.Runtime.Serialization.EnumMember(Value = @"portrait")]
+  portrait,
+  landscape
 }
 
+[JsonConverter(typeof(StringEnumConverter))]
 public enum SectionType
 {
-    row,
-    carousel,
+  row,
+  carousel,
 }
 
 
@@ -119,70 +95,70 @@ public class SuggestionsArgs
   public BaseItemKind[]? type { get; set; }
 }
 
- [XmlRoot("dictionary")]
-    public class SerializableDictionary<TKey, TValue>
-        : Dictionary<TKey, TValue>, IXmlSerializable
+[XmlRoot("dictionary")]
+public class SerializableDictionary<TKey, TValue>
+       : Dictionary<TKey, TValue>, IXmlSerializable
+{
+  #region IXmlSerializable Members
+  public System.Xml.Schema.XmlSchema GetSchema()
+  {
+    return null;
+  }
+
+  public void ReadXml(System.Xml.XmlReader reader)
+  {
+    XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
+    XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
+
+    bool wasEmpty = reader.IsEmptyElement;
+    reader.Read();
+
+    if (wasEmpty)
+      return;
+
+    while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
     {
-        #region IXmlSerializable Members
-        public System.Xml.Schema.XmlSchema GetSchema()
-        {
-            return null;
-        }
- 
-        public void ReadXml(System.Xml.XmlReader reader)
-        {
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
- 
-            bool wasEmpty = reader.IsEmptyElement;
-            reader.Read();
- 
-            if (wasEmpty)
-                return;
- 
-            while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
-            {
-                reader.ReadStartElement("item");
- 
-                reader.ReadStartElement("key");
-                TKey key = (TKey)keySerializer.Deserialize(reader);
-                reader.ReadEndElement();
- 
-                reader.ReadStartElement("value");
-                TValue value = (TValue)valueSerializer.Deserialize(reader);
-                reader.ReadEndElement();
- 
-                this.Add(key, value);
- 
-                reader.ReadEndElement();
-                reader.MoveToContent();
-            }
-            reader.ReadEndElement();
-        }
- 
-        public void WriteXml(System.Xml.XmlWriter writer)
-        {
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
- 
-            foreach (TKey key in this.Keys)
-            {
-                writer.WriteStartElement("item");
- 
-                writer.WriteStartElement("key");
-                keySerializer.Serialize(writer, key);
-                writer.WriteEndElement();
- 
-                writer.WriteStartElement("value");
-                TValue value = this[key];
-                valueSerializer.Serialize(writer, value);
-                writer.WriteEndElement();
- 
-                writer.WriteEndElement();
-            }
-        }
-        #endregion
+      reader.ReadStartElement("item");
+
+      reader.ReadStartElement("key");
+      TKey key = (TKey)keySerializer.Deserialize(reader);
+      reader.ReadEndElement();
+
+      reader.ReadStartElement("value");
+      TValue value = (TValue)valueSerializer.Deserialize(reader);
+      reader.ReadEndElement();
+
+      this.Add(key, value);
+
+      reader.ReadEndElement();
+      reader.MoveToContent();
     }
+    reader.ReadEndElement();
+  }
+
+  public void WriteXml(System.Xml.XmlWriter writer)
+  {
+    XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
+    XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
+
+    foreach (TKey key in this.Keys)
+    {
+      writer.WriteStartElement("item");
+
+      writer.WriteStartElement("key");
+      keySerializer.Serialize(writer, key);
+      writer.WriteEndElement();
+
+      writer.WriteStartElement("value");
+      TValue value = this[key];
+      valueSerializer.Serialize(writer, value);
+      writer.WriteEndElement();
+
+      writer.WriteEndElement();
+    }
+  }
+  #endregion
+}
 /*
 home:
   sections:
