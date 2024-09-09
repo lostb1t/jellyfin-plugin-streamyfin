@@ -43,6 +43,10 @@ home:
       style: portrait
       type: row 
       suggestions:
+        args:
+          type: 
+            - Movie
+            - Series
 ";
 
     var deserializer = new DeserializerBuilder()
