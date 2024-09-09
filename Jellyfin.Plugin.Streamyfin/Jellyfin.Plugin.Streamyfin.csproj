@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Configuration\config.html" />
-    <!-- <EmbeddedResource Include="Configuration\config.js" />  -->
+    <EmbeddedResource Include="Configuration\config.js" /> 
   </ItemGroup>
 
 </Project>

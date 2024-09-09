@@ -1,137 +1,31 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-
-<head>
-    <title>Streamyfin</title>
-    <link href="https://cdn.jsdelivr.net/npm/vscode-codicons@0.0.17/dist/codicon.min.css" rel="stylesheet">
-
-</head>
-
-<body>
-    <div data-role="page" id="StreamyfinConfigPage" class="page type-interior pluginConfigurationPage fullWidthContent">
-        <script>
-            Dashboard.showLoadingMsg();
-        </script>
-        <div class="content-primary">
-            <div class="verticalSection">
-                <div class="sectionTitleContainer">
-                    <h2 class="sectionTitle">Streamyfin</h2>
-                    <a is="emby-linkbutton" class="raised raised-mini" style="margin-left: 2em;" target="_blank"
-                        href="https://github.com/lostb1t/jellyfin-plugin-streamyfin">
-                        <i class="md-icon button-icon button-icon-left secondaryText"></i>
-                        <span>Help</span>
-                    </a>
-                </div>
+<div data-role="page" id="StreamyfinConfigPage" class="page type-interior pluginConfigurationPage fullWidthContent"
+    data-controller="__plugin/Streamyfin.js">
+    <script>
+        Dashboard.showLoadingMsg();
+    </script>
+    <div class="content-primary">
+        <div class="verticalSection">
+            <div class="sectionTitleContainer">
+                <h2 class="sectionTitle">Streamyfin</h2>
+                <a is="emby-linkbutton" class="raised raised-mini" style="margin-left: 2em;" target="_blank"
+                    href="https://github.com/lostb1t/jellyfin-plugin-streamyfin">
+                    <i class="md-icon button-icon button-icon-left secondaryText"></i>
+                    <span>Help</span>
+                </a>
             </div>
-
-            <form>
-                <button id="saveConfig" is="emby-button" type="submit" class="raised button-submit block">
-                    <span>Save</span>
-                </button>
-            </form>
-
-            <div id="yamleditor" style="width: 800px; height: 600px; border: 0px solid grey"></div>
-
-
         </div>
-        <script id="hljs" async
-            src="https://unpkg.com/@skrashevich/monaco-yaml-prebuilt@1.1.2/dist/monaco-editor.bundle.js"></script>
 
-        <script>
-            const Streamyfin = {
-                pluginId: "1e9e5d38-6e67-4615-8719-e98a5c34f004",
-                btnSave: document.querySelector("#saveConfig"),
-                editor: null,
-                saveConfig: function (e) {
-                    e.preventDefault();
-                    Dashboard.showLoadingMsg();
-                    const config = {
-                        Value: Streamyfin.editor.getModel().getValue()
-                    };
+        <form>
+            <button id="saveConfig" is="emby-button" type="submit" class="raised button-submit block">
+                <span>Save</span>
+            </button>
+        </form>
 
-                    const url = window.ApiClient.getUrl('streamyfin/config/yaml');
-                    const data = JSON.stringify(config);
+        <div id="yamleditor" style="width: 800px; height: 600px; border: 0px solid grey"></div>
 
-                    window.ApiClient.ajax({ type: 'POST', url, data, contentType: 'application/json' })
-                        .then(function (response) {
-                            response.json().then(res => {
-                                if (res.Error == true) {
-                                    Dashboard.hideLoadingMsg();
-                                    Dashboard.alert(res.Message);
-                                } else {
-                                    Dashboard.processPluginConfigurationUpdateResult();
-                                }
-                            })
-                        }
-
-                        )
-                        .catch(function (error) {
-                            //alert(error);
-                            console.error(error);
-                        })
-                        .finally(function () {
-                            Dashboard.hideLoadingMsg();
-                        });
-
-                },
-                loadConfig: function () {
-                    Dashboard.showLoadingMsg();
-                    const url = window.ApiClient.getUrl('streamyfin/config/yaml');
-                    window.ApiClient.ajax({ type: 'GET', url, contentType: 'application/json' })
-                        .then(function (response) {
-                            response.json().then(res => {
-                                const yamlModelUri = monaco.Uri.parse('streamyfin.yaml');
-                                Streamyfin.editor = monaco.editor.create(document.getElementById('yamleditor'), {
-                                    automaticLayout: true,
-                                    language: 'yaml',
-                                    quickSuggestions: {
-                                        other: true,
-                                        comments: false,
-                                        strings: true
-                                    },
-                                    model: monaco.editor.createModel(res.Value, 'yaml', yamlModelUri),
-                                });
-                            })
-                        })
-                        .catch(function (error) {
-                            console.error(error);
-                        })
-                        .finally(function () {
-                            Dashboard.hideLoadingMsg();
-                        });
-                },
-                init: function () {
-                    monaco.editor.setTheme('vs-dark');
-                    const monaco_yaml = monacoYaml.configureMonacoYaml(monaco, {
-                        enableSchemaRequest: true,
-                        hover: true,
-                        completion: true,
-                        validate: true,
-                        format: true,
-                        schemas: [
-                            {
-                                uri: location.origin + '/streamyfin/config/schema',
-                                fileMatch: ["*"],
-                            },
-                        ],
-                    });
-                    console.log("init");
-                    Streamyfin.loadConfig();
-                    Streamyfin.btnSave.addEventListener("click", Streamyfin.saveConfig);
-                }
-            }
-
-            function waitForScript() {
-                if (typeof monaco === "undefined") {
-                    setTimeout(waitForScript, 50);
-                } else {
-                    Streamyfin.init();
-                }
-            }
-            waitForScript();
-        </script>
 
     </div>
-</body>
+    <script id="hljs" async
+        src="https://unpkg.com/@skrashevich/monaco-yaml-prebuilt@1.1.2/dist/monaco-editor.bundle.js"></script>
 
-</html>
+</div>

@@ -38,17 +38,17 @@ public class StreamyfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
-            var prefix = GetType().Namespace;
-            yield return new PluginPageInfo
-            {
-                Name = Name,
-                EmbeddedResourcePath = prefix + ".Configuration.config.html",
-            };
+        var prefix = GetType().Namespace;
+        yield return new PluginPageInfo
+        {
+            Name = Name,
+            EmbeddedResourcePath = prefix + ".Configuration.config.html",
+        };
 
-            //  yield return new PluginPageInfo
-            //  {
-            //      Name = "config.js",
-            //      EmbeddedResourcePath = prefix + ".Configuration.config.js"
-            //  };
+        yield return new PluginPageInfo
+        {
+            Name = $"{Name}.js",
+            EmbeddedResourcePath = prefix + ".Configuration.config.js"
+        };
     }
 }
