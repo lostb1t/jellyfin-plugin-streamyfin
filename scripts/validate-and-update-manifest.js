@@ -2,22 +2,46 @@ const https = require('https');
 const crypto = require('crypto');
 const fs = require('fs');
 const { URL } = require('url');
+const { place } = require('./manifest-versions');
 
 const repository = process.env.GITHUB_REPO;
 const version = process.env.VERSION;
 const file = process.env.FILE;
+
+// The tag the release lives under. It is the version on the stable channel and
+// `unstable-<version>` on the other, so the links here are built from the tag while
+// the entry is keyed on the version Jellyfin compares.
+const tag = process.env.RELEASE_TAG || process.env.VERSION;
 
 // The minimum server this build actually runs on, taken from the build rather
 // than written here. It used to be hardcoded to 10.11.11, which is why the
 // published manifest demanded a server three patches newer than necessary.
 const targetAbi = process.env.JELLYFIN_ABI;
 
-// jf11 keeps manifest.json so servers already configured with that URL keep
-// working. jf12 gets its own file, the same way the JavaScript Injector plugin
-// ships one manifest per Jellyfin line.
+// One file per channel and per Jellyfin line, named by the Makefile. jf11 on the
+// stable channel keeps manifest.json so servers already configured with that URL
+// keep working; every other combination gets its own name, the same way the
+// JavaScript Injector plugin ships one manifest per Jellyfin line.
 const manifestPath = `./${process.env.MANIFEST || 'manifest.json'}`;
 
 const dryRun = process.env.DRY_RUN === '1';
+
+// How many entries the manifest keeps. A release manifest keeps every version it ever
+// published, because somebody may want to pin an old one, so unset means keep everything
+// and the stable channel never sets it. An unstable manifest has no such claim on
+// anyone: its entries point at prereleases that exist to be replaced, and left unpruned
+// the file gains one entry per build forever.
+const keep = (() => {
+    const raw = (process.env.MANIFEST_KEEP || '').trim();
+    if (!raw) return null;
+
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 1) {
+        console.error(`MANIFEST_KEEP must be a positive whole number, not: ${raw}`);
+        process.exit(1);
+    }
+    return n;
+})();
 
 for (const [name, value] of Object.entries({ GITHUB_REPO: repository, VERSION: version, FILE: file, JELLYFIN_ABI: targetAbi })) {
     if (!value) {
@@ -37,9 +61,9 @@ const jsonData = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
 const newVersion = {
     version,
-    changelog: `- See the full changelog at [GitHub](https://github.com/${repository}/releases/tag/${version})\n`,
+    changelog: `- See the full changelog at [GitHub](https://github.com/${repository}/releases/tag/${tag})\n`,
     targetAbi,
-    sourceUrl: `https://github.com/${repository}/releases/download/${version}/${file}`, 
+    sourceUrl: `https://github.com/${repository}/releases/download/${tag}/${file}`,
     checksum: getMD5FromFile(),
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
 };
@@ -47,16 +71,18 @@ const newVersion = {
 async function updateManifest() {
     await validVersion(newVersion);
 
-    // Drop any entry for this version before adding it. Without this, republishing
-    // a version leaves two entries for it and Jellyfin shows the plugin twice.
-    const before = jsonData[0].versions.length;
-    jsonData[0].versions = jsonData[0].versions.filter((v) => v.version !== newVersion.version);
-    const removed = before - jsonData[0].versions.length;
-    if (removed > 0) {
-        console.log(`Replaced ${removed} existing entr${removed === 1 ? 'y' : 'ies'} for ${newVersion.version}`);
+    const { versions, replaced, dropped } = place(jsonData[0].versions, newVersion, keep);
+    jsonData[0].versions = versions;
+
+    if (replaced > 0) {
+        console.log(`Replaced ${replaced} existing entr${replaced === 1 ? 'y' : 'ies'} for ${newVersion.version}`);
     }
 
-    jsonData[0].versions.unshift(newVersion);
+    // Trimming drops builds nobody can reach any more. The release they point at stays on
+    // GitHub, only the manifest stops offering it.
+    if (dropped.length > 0) {
+        console.log(`Keeping the newest ${keep}, dropping ${dropped.map((v) => v.version).join(', ')}`);
+    }
 
     const updated = JSON.stringify(jsonData, null, 4);
 

@@ -130,6 +130,34 @@ manual install has one more step than it looks.
 > `GetUsers()` inside that patch line. An older server refuses the plugin rather
 > than loading it, and keeps running.
 
+### Unstable builds
+
+Work in progress, published so it can be tried on a real server before it is
+released. These are builds of the `develop` branch: they are not a release, they
+have not been through a release's checks, and one of them can break something the
+last release did correctly.
+
+Add the URL for your Jellyfin line, the same way as above:
+
+| Your Jellyfin | Repository URL |
+|---|---|
+| 10.11.9 and later | `https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-unstable.json` |
+| 12.0 and later | `https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-unstable-jf12.json` |
+
+An unstable build is numbered above the release it follows: after 0.68.1.0 they are
+0.68.1.1, 0.68.1.2 and so on, counting commits. The next release, 0.69.0.0, is above
+all of them, so **removing the unstable repository puts you back on the stable path
+by itself**: the next release is offered as an ordinary update. Nothing has to be
+uninstalled.
+
+Keep both repositories and you are on the unstable channel, since its builds are the
+newer number until the next release goes out. That is the point of it, and it is the
+reason to remove the URL once you are done testing.
+
+> Jellyfin 13 does not exist yet. Its packages are not published, so nothing can be
+> compiled against it. The 12 build installs on a 13 server in the meantime, because
+> `targetAbi` is the oldest server a build accepts rather than the only one.
+
 ---
 
 ## 🚀 Quick Start
