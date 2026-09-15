@@ -13,16 +13,16 @@
                 "changelog": "- See the full changelog at [GitHub](https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases/tag/unstable-0.68.1.59)\n",
                 "targetAbi": "12.0.0.0",
                 "sourceUrl": "https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases/download/unstable-0.68.1.59/streamyfin-0.68.1.59-jf12.zip",
-                "checksum": "d1281b97f38c3276f44835b308ebddc6",
-                "timestamp": "2026-09-15T19:42:50Z"
+                "checksum": "f20c29f478cad656e5eeef6e6b415fb4",
+                "timestamp": "2026-09-15T20:05:36Z"
             },
             {
                 "version": "0.68.1.59",
                 "changelog": "- See the full changelog at [GitHub](https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases/tag/unstable-0.68.1.59)\n",
                 "targetAbi": "10.11.9.0",
                 "sourceUrl": "https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases/download/unstable-0.68.1.59/streamyfin-0.68.1.59-jf11.zip",
-                "checksum": "10731b858deeeeb3abd47928dd738c12",
-                "timestamp": "2026-09-15T19:42:49Z"
+                "checksum": "25033bfc3d9eea483898f8321ac8c827",
+                "timestamp": "2026-09-15T20:05:35Z"
             }
         ]
     }
