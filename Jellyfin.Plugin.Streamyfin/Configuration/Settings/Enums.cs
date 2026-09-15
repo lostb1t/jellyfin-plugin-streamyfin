@@ -1,5 +1,6 @@
 #pragma warning disable CA1008
 
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
@@ -41,6 +42,11 @@ public enum OrientationLock {
     /**
      * Both landscape directions, letting the device rotate between them.
      */
+    // The one member whose derived label would not match the app. Humanize turns the
+    // name into "Landscape", and the app calls this "Landscape auto" in its own picker,
+    // so an administrator reading the two side by side would not know they were the
+    // same choice. Every other member here derives correctly.
+    [Display(Name = "Landscape auto")]
     Landscape = 5,
     /**
      * Left landscape only.

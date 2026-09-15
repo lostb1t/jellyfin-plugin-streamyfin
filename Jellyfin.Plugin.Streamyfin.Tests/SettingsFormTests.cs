@@ -89,6 +89,10 @@ public class SettingsFormTests
     [Theory]
     [InlineData("defaultBitrate", "_250KB", "250 KB")]
     [InlineData("subtitleMode", "OnlyForced", "Only forced")]
+    // #110. The app's own picker calls this "Landscape auto", and deriving from the
+    // member name gives "Landscape", so the two screens named the same choice
+    // differently and an administrator had no way to tell they matched.
+    [InlineData("defaultVideoOrientation", "Landscape", "Landscape auto")]
     public void AChoiceIsLabelledForAPerson(string key, string value, string expected)
     {
         var option = Assert.Single(Field(key).Options.Where(o => o.Value == value));
