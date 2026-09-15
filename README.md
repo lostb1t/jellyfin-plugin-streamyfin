@@ -85,16 +85,85 @@ Tailor the library experience:
 6. Click **Install**
 7. **Restart Jellyfin** to complete installation
 
+One URL for every supported server. The plugin is built twice, once for Jellyfin
+10.11 and once for Jellyfin 12, and both builds are listed in that file; your server
+picks the one it can run and never sees the other. Upgrading your server from 10.11
+to 12 needs nothing changed here, and the next update is simply the right build.
+
 ### Method 2: Manual Installation
 
-1. Download the latest release from [GitHub Releases](https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases)
-2. Extract the `.dll` file to your Jellyfin plugins directory:
-   - **Linux**: `/var/lib/jellyfin/plugins/Streamyfin/`
-   - **Windows**: `%AppData%\Jellyfin\Server\plugins\Streamyfin\`
-   - **Docker**: `/config/plugins/Streamyfin/`
-3. **Restart Jellyfin**
+Use this only when the catalogue is not an option, and give it the `meta.json` in
+step 4 even though the plugin loads without one. Jellyfin does not refuse a folder
+that has none: it reads the name and version out of the folder name instead. What it
+cannot invent is the plugin's identity, so it uses the MD5 of the folder name as the
+id, the server never matches that to the catalogue entry, and **the plugin never
+receives an update again**. The file is what keeps it updatable.
 
-> Requires .NET 9 / Jellyfin 10.11 or newer (as of plugin 0.64.0.0).
+1. Download the `.zip` for your Jellyfin version from
+   [GitHub Releases](https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases):
+   `-jf11` for 10.11, `-jf12` for 12.
+2. Create a folder named `Streamyfin_<version>` in your plugins directory:
+   - **Linux**: `/var/lib/jellyfin/plugins/Streamyfin_0.70.0.0/`
+   - **Windows**: `%AppData%\Jellyfin\Server\plugins\Streamyfin_0.70.0.0\`
+   - **Docker**: `/config/plugins/Streamyfin_0.70.0.0/`
+3. Extract **everything** from the zip into it, not only
+   `Jellyfin.Plugin.Streamyfin.dll`. The other assemblies beside it are required,
+   and without them Jellyfin logs "Failed to load assembly" and disables the
+   plugin.
+4. Add a `meta.json` in the same folder, keeping the `guid` exactly as it is since
+   that is the whole point, and using the `targetAbi` of the line you downloaded
+   (`10.11.9.0` for `-jf11`, `12.0.0.0` for `-jf12`):
+
+   ```json
+   {
+     "guid": "1e9e5d38-6e67-4615-8719-e98a5c34f004",
+     "name": "Streamyfin",
+     "version": "0.70.0.0",
+     "targetAbi": "12.0.0.0",
+     "status": "Active",
+     "autoUpdate": false,
+     "assemblies": []
+   }
+   ```
+
+   That is the `-jf12` file. For `-jf11`, the same line reads
+   `"targetAbi": "10.11.9.0"`. Declaring an ABI higher than your server has it
+   refuse the plugin, which is what copying this one unchanged onto a 10.11 server
+   would do.
+
+5. **Restart Jellyfin**
+
+> **Jellyfin 10.11.9 or later, or Jellyfin 12.** 10.11.9 is the floor for the
+> 10.11 line rather than 10.11.0, because `IUserManager.Users` became
+> `GetUsers()` inside that patch line. An older server refuses the plugin rather
+> than loading it, and keeps running.
+
+### Unstable builds
+
+Work in progress, published so it can be tried on a real server before it is
+released. These are builds of the `develop` branch: they are not a release, they
+have not been through a release's checks, and one of them can break something the
+last release did correctly.
+
+Add this URL the same way as above, beside the one you already have:
+
+```
+https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-unstable.json
+```
+
+An unstable build is numbered above the release it follows: after 0.68.1.0 they are
+0.68.1.1, 0.68.1.2 and so on, counting commits. The next release, 0.69.0.0, is above
+all of them, so **removing the unstable repository puts you back on the stable path
+by itself**: the next release is offered as an ordinary update. Nothing has to be
+uninstalled.
+
+Keep both repositories and you are on the unstable channel, since its builds are the
+newer number until the next release goes out. That is the point of it, and it is the
+reason to remove the URL once you are done testing.
+
+> Running Jellyfin 13 unstable? The 12 build is what installs there, and the same
+> `manifest.json` above serves it: `targetAbi` is the oldest server a build accepts
+> rather than the only one. A build of its own will come when Jellyfin 13 needs one.
 
 ---
 

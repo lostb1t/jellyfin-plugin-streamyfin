@@ -79,12 +79,17 @@ jobs:
       # how a zip path pinned to net9.0 survived unnoticed: nothing ever built the
       # other target's package. Packaging now runs on every pull request, with a
       # placeholder version since a pull request checkout has no tags.
+      #
+      # Both channels, for the same reason. Only one of the two is exercised by cutting
+      # a release, so an unstable publish that fails on its own manifest would otherwise
+      # be found by whoever ran it first.
       - name: Package
         env:
           VERSION: 0.0.0.0
         run: |
           make zip JELLYFIN_TARGET=${{ matrix.target }}
           make update-manifest JELLYFIN_TARGET=${{ matrix.target }} DRY_RUN=1
+          make update-manifest JELLYFIN_TARGET=${{ matrix.target }} DRY_RUN=1 CHANNEL=unstable
 
       - name: Upload plugin
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
