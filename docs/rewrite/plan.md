@@ -322,7 +322,10 @@ the manifest that stops the gap reopening are in
 ## Progress
 
 Everything merged below is on `develop`, which reaches `main` through
-[#121](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/121).
+[#121](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/121). The one
+exception is [#168](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/168),
+which went straight onto `main` because that is the only place its workflows can fire
+from.
 
 | Sub part | Pull request | State |
 |---|---|---|

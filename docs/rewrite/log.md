@@ -958,7 +958,7 @@ catalogue, and loaded. The beta tracks the channel from here.
 
 ### One manifest, not one per line
 
-#126 gave each Jellyfin line a manifest of its own and that was the wrong shape: it
+Pull request #126 gave each Jellyfin line a manifest of its own and that was the wrong shape: it
 turns a server upgrade into a configuration change, since somebody moving from 10.11
 to 12 has to know the URL they pasted a year ago is now the wrong one. #165 collapses
 it to one file per channel, which is what `manifest.json` always did anyway, its 62
@@ -995,10 +995,14 @@ request had already been opened on the app repository before anyone read that
 sentence; it is closed.
 
 **No scheduled run has ever happened in this repository.** `runs schedule: 0`.
-`security.yml` and `housekeeping.yml` had ten runs each, all of them pushes. GitHub
-fires `schedule` and `workflow_dispatch` only from the default branch and these lived
-on `develop`, so the weekly CodeQL scan, the stale sweep and the NuGet watch had been
-decorative since the day they were written. #168 puts the four that need it on `main`.
+`security.yml` and `housekeeping.yml` had ten runs each, all of them pushes. Both
+triggers need the workflow file to be on the default branch before they exist at all,
+and these lived only on `develop`. What each does from there differs and is worth
+keeping straight: `schedule` runs the default branch's copy, while `workflow_dispatch`
+becomes available and can then be pointed at whichever branch you choose, which is how
+the first unstable build was published from `develop`. Either way the weekly CodeQL
+scan, the stale sweep and the NuGet watch had been decorative since the day they were
+written. #168 puts the four that need it on `main`.
 
 ### #81, picked up
 
