@@ -102,4 +102,60 @@
         <!-- 0 = Name, 1 = Year -->U
         <value>{0} ({1})</value>
     </data>
+    <!-- region Seerr webhook -->
+    <data name="SeerrUnknownMedia" xml:space="preserve">
+        <value>Média inconnu</value>
+    </data>
+    <data name="SeerrUnknownRequester" xml:space="preserve">
+        <value>Quelqu'un</value>
+    </data>
+    <data name="SeerrTestTitle" xml:space="preserve">
+        <value>Seerr est connecté</value>
+    </data>
+    <data name="SeerrTestBody" xml:space="preserve">
+        <value>Ceci est la notification de test de votre serveur Seerr</value>
+    </data>
+    <data name="SeerrRequestPendingTitle" xml:space="preserve">
+        <value>Nouvelle demande</value>
+    </data>
+    <data name="SeerrRequestPendingBody" xml:space="preserve">
+        <!-- 0 = Requester, 1 = Media name -->
+        <value>{0} a demandé {1}</value>
+    </data>
+    <data name="SeerrRequestAutoApprovedTitle" xml:space="preserve">
+        <value>Demande approuvée automatiquement</value>
+    </data>
+    <data name="SeerrRequestAutoApprovedBody" xml:space="preserve">
+        <!-- 0 = Requester, 1 = Media name -->
+        <value>La demande de {0} pour {1} a été approuvée automatiquement</value>
+    </data>
+    <data name="SeerrRequestFailedTitle" xml:space="preserve">
+        <value>Échec de la demande</value>
+    </data>
+    <data name="SeerrRequestFailedBody" xml:space="preserve">
+        <!-- 0 = Requester, 1 = Media name -->
+        <value>La demande de {0} pour {1} a échoué</value>
+    </data>
+    <data name="SeerrRequestApprovedTitle" xml:space="preserve">
+        <value>Demande approuvée</value>
+    </data>
+    <data name="SeerrRequestApprovedBody" xml:space="preserve">
+        <!-- 0 = Requester, 1 = Media name -->
+        <value>Votre demande pour {1} a été approuvée</value>
+    </data>
+    <data name="SeerrRequestDeclinedTitle" xml:space="preserve">
+        <value>Demande refusée</value>
+    </data>
+    <data name="SeerrRequestDeclinedBody" xml:space="preserve">
+        <!-- 0 = Requester, 1 = Media name -->
+        <value>Votre demande pour {1} a été refusée</value>
+    </data>
+    <data name="SeerrRequestAvailableTitle" xml:space="preserve">
+        <value>Prêt à regarder</value>
+    </data>
+    <data name="SeerrRequestAvailableBody" xml:space="preserve">
+        <!-- 0 = Requester, 1 = Media name -->
+        <value>{1} est disponible</value>
+    </data>
+    <!-- endregion Seerr webhook -->
 </root>
