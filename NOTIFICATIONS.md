@@ -18,7 +18,7 @@ If you want to start using the notification endpoint directly with other service
 
 Custom webhook examples:
 - [Jellyfin](#Jellyfin)
-- [Jellyseerr](#jellyseerr)
+- [Seerr](#seerr)
 
 ---
 
@@ -103,14 +103,58 @@ If we don't directly support an event, you'll want to create a separate webhook 
 
 ---
 
-## Jellyseerr
+## Seerr
 
-You can go to your Jellyseerr instance's notification settings to forward events
+Seerr is the project formerly called Jellyseerr. Two ways to connect it, and they can
+be used together.
+
+### Requests, without writing a template
+
+`http(s)://server.instance/Streamyfin/v1/notifications/seerr`
+
+This route takes Seerr's own webhook body, unchanged, and decides who each event is
+for. That routing is the reason it exists: an approval is addressed to the person who
+asked for the media and goes to nobody else, while what the server operator has to act
+on goes to administrators.
+
+| Seerr event | Who receives it |
+|---|---|
+| Request Pending | Administrators |
+| Request Automatically Approved | Administrators |
+| Request Processing Failed | Administrators |
+| Request Approved | The person who requested it |
+| Request Declined | The person who requested it |
+| Media Available | The person who requested it |
+| Anything with an issue | Nobody, see below |
+
+To set it up:
 
 - Go to Settings > Notifications > Webhook
 - Check "Enable Agent"
-- Enter notification endpoint as "Webhook URL"
-- Copy an example below
+- Webhook URL: the route above
+- Authorization Header: `MediaBrowser Token="{apiKey}"`, the same key as the generic
+  endpoint
+- Leave the JSON Payload at its default. It is Seerr's own payload that is expected
+  here, so editing it will stop this working
+- Select the notification types in the table above
+
+A user only receives their own notifications if their Seerr account signs in through
+Jellyfin, since the routing matches Seerr's requester against Jellyfin usernames. A
+Seerr account that is local to Seerr matches nothing and the notification goes nowhere.
+
+An event this route does not know about, one Seerr adds later, is passed through with
+Seerr's own subject and message rather than dropped.
+
+### Issues, and anything else, with a template
+
+Issue events are not handled by the route above. They are a conversation rather than a
+request, and the comment body is not something the plugin models, so they stay on the
+generic endpoint with a template you write.
+
+- Go to Settings > Notifications > Webhook
+- Check "Enable Agent"
+- Enter the generic notification endpoint as "Webhook URL"
+- Copy the example below
 
 [Template variable help](https://docs.overseerr.dev/using-overseerr/notifications/webhooks#template-variables)
 

@@ -25,6 +25,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<LocalizationHelper>();
         serviceCollection.AddSingleton<SerializationHelper>();
         serviceCollection.AddSingleton<NotificationHelper>();
+        serviceCollection.AddSingleton<SeerrNotificationMapper>();
 
         // The client that talks to Expo. Thirty seconds rather than the hundred an
         // HttpClient defaults to: a push send happens inside an event handler the server is

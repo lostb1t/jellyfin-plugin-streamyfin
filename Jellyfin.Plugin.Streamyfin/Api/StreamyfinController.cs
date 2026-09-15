@@ -86,6 +86,7 @@ public class StreamyfinController : ControllerBase
   private readonly SerializationHelper _serializationHelperService;
   private readonly NotificationHelper _notificationHelper;
   private readonly IntegrationProbe _integrations;
+  private readonly SeerrNotificationMapper _seerr;
 
   public StreamyfinController(
     ILoggerFactory loggerFactory,
@@ -95,7 +96,8 @@ public class StreamyfinController : ControllerBase
     ILibraryManager libraryManager,
     SerializationHelper serializationHelper,
     NotificationHelper notificationHelper,
-    IntegrationProbe integrations
+    IntegrationProbe integrations,
+    SeerrNotificationMapper seerr
   )
   {
     _loggerFactory = loggerFactory;
@@ -107,6 +109,7 @@ public class StreamyfinController : ControllerBase
     _serializationHelperService = serializationHelper;
     _notificationHelper = notificationHelper;
     _integrations = integrations;
+    _seerr = seerr;
 
     _logger.LogInformation("StreamyfinController Loaded");
   }
@@ -612,6 +615,47 @@ public class StreamyfinController : ControllerBase
     var task = _notificationHelper.Send(validNotifications);
     task.Wait();
     return new JsonResult(_serializationHelperService.ToJson(task.Result));
+  }
+
+  /// <summary>
+  /// Receive a Seerr webhook and turn it into a notification.
+  /// </summary>
+  /// <param name="payload">Seerr's own webhook body, posted unchanged.</param>
+  /// <returns>Expo's answer, or 202 when the event is not one this handles.</returns>
+  /// <remarks>
+  /// The generic notification route already accepts Seerr, through a JSON template the
+  /// administrator writes in Seerr's webhook agent, and NOTIFICATIONS.md documents it.
+  /// This exists for the part a template cannot express: who the notification is for. An
+  /// approval goes to the person who asked and to nobody else, a failure goes to the
+  /// people who can act on it.
+  ///
+  /// <para>
+  /// Elevated, and reached the same way as the route above: Seerr's webhook agent sends
+  /// an <c>Authorization</c> header holding a Jellyfin API key, which Jellyfin treats as
+  /// an administrator. No versionless shim, since this route is new and nothing in the
+  /// field calls it.
+  /// </para>
+  ///
+  /// <para>
+  /// The payload is never logged. Seerr sends the requester's email address, Discord id
+  /// and Telegram chat id alongside their username, so a debug line carrying the body
+  /// would write other people's contact details into the server log.
+  /// </para>
+  /// </remarks>
+  [HttpPost("v1/notifications/seerr")]
+  [Authorize(Policy = Policies.RequiresElevation)]
+  [ProducesResponseType(StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status202Accepted)]
+  public ActionResult PostSeerrNotification([FromBody, Required] SeerrWebhookPayload payload)
+  {
+    var notification = _seerr.Map(payload);
+
+    if (notification is null)
+    {
+      return new AcceptedResult();
+    }
+
+    return PostNotifications([notification]);
   }
 
   // region Settings groups
