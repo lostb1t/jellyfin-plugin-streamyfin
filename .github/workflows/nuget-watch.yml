@@ -34,7 +34,14 @@ jobs:
       packages: read
 
     steps:
+      # develop, explicitly, rather than whatever branch this runs from. A scheduled
+      # workflow runs from the default branch, and the thing being compared against is
+      # "what this repository builds", which is decided in develop's Directory.Build.props
+      # while the rewrite is in flight. Named here so the same file behaves the same on
+      # both branches.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: develop
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
