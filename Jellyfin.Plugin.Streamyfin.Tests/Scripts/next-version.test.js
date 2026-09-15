@@ -108,9 +108,14 @@ describe("next-version", () => {
 // The unstable channel exists so a build of develop can be installed the ordinary way,
 // from a manifest of its own. Its whole contract is the version it computes.
 describe("next-version, unstable channel", () => {
+    // In its own repository rather than this one. A pull request checkout carries no
+    // tags, so reading the real history here passed on a developer's machine and failed
+    // on CI with "No release tag to count from".
     test("numbers a build above the last release and below the next one", () => {
-        const unstable = run({ CHANNEL: "unstable", RELEASE_VERSION: "" });
-        const stable = run({ CHANNEL: "stable", RELEASE_VERSION: "" });
+        const repository = repositoryWith(["0.68.1.0", null, null]);
+
+        const unstable = run({ CHANNEL: "unstable", RELEASE_VERSION: "" }, repository);
+        const stable = run({ CHANNEL: "stable", RELEASE_VERSION: "" }, repository);
 
         expect(unstable.ok).toBe(true);
         expect(unstable.out).toMatch(/^\d+\.\d+\.\d+\.\d+$/);
