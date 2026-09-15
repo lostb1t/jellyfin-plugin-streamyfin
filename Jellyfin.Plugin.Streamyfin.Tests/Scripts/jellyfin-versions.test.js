@@ -108,6 +108,14 @@ describe("classifying what is published", () => {
         expect(newerInLine).toEqual([]);
     });
 
+    // The caller hands in the union of the releases feed and the prerelease feed, and a
+    // version published to both is one version, not two entries in the issue title.
+    test("a version published to both feeds is named once", () => {
+        const { newerInLine } = classify(["12.1.0", "12.1.0"], built);
+
+        expect(newerInLine).toEqual(["12.1.0"]);
+    });
+
     test("the report is ordered oldest first, so the issue reads in order", () => {
         const { newLines } = classify(["13.1.0", "13.0.0-rc1", "13.0.0"], built);
 

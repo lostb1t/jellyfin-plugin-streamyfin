@@ -71,7 +71,9 @@ function classify(published, built) {
         if (!known || compare(version, known) > 0) floors.set(major, version);
     }
 
-    const parsed = published.map(parse).filter(Boolean);
+    // Deduplicated, because the caller hands in the union of two feeds and a version
+    // published to both is one version. Without this it is named twice in the issue.
+    const parsed = [...new Set(published)].map(parse).filter(Boolean);
 
     // A major older than everything built here is a line that was dropped on purpose,
     // not news, so the newest built major is what decides whether an unknown line counts.

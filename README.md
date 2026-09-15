@@ -92,9 +92,12 @@ to 12 needs nothing changed here, and the next update is simply the right build.
 
 ### Method 2: Manual Installation
 
-Use this only when the catalogue is not an option. Jellyfin writes a `meta.json`
-for you when it installs a plugin, and refuses a plugin folder that has none, so a
-manual install has one more step than it looks.
+Use this only when the catalogue is not an option, and give it the `meta.json` in
+step 4 even though the plugin loads without one. Jellyfin does not refuse a folder
+that has none: it reads the name and version out of the folder name instead. What it
+cannot invent is the plugin's identity, so it uses the MD5 of the folder name as the
+id, the server never matches that to the catalogue entry, and **the plugin never
+receives an update again**. The file is what keeps it updatable.
 
 1. Download the `.zip` for your Jellyfin version from
    [GitHub Releases](https://github.com/streamyfin/jellyfin-plugin-streamyfin/releases):
@@ -107,8 +110,9 @@ manual install has one more step than it looks.
    `Jellyfin.Plugin.Streamyfin.dll`. The other assemblies beside it are required,
    and without them Jellyfin logs "Failed to load assembly" and disables the
    plugin.
-4. Add a `meta.json` in the same folder, with the `targetAbi` of the line you
-   downloaded (`10.11.9.0` for `-jf11`, `12.0.0.0` for `-jf12`):
+4. Add a `meta.json` in the same folder, keeping the `guid` exactly as it is since
+   that is the whole point, and using the `targetAbi` of the line you downloaded
+   (`10.11.9.0` for `-jf11`, `12.0.0.0` for `-jf12`):
 
    ```json
    {
@@ -157,9 +161,9 @@ Keep both repositories and you are on the unstable channel, since its builds are
 newer number until the next release goes out. That is the point of it, and it is the
 reason to remove the URL once you are done testing.
 
-> Jellyfin 13 does not exist yet. Its packages are not published, so nothing can be
-> compiled against it. The 12 build installs on a 13 server in the meantime, because
-> `targetAbi` is the oldest server a build accepts rather than the only one.
+> Running Jellyfin 13 unstable? The 12 build is what installs there, and the same
+> `manifest.json` above serves it: `targetAbi` is the oldest server a build accepts
+> rather than the only one. A build of its own will come when Jellyfin 13 needs one.
 
 ---
 

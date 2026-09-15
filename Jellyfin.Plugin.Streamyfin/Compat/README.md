@@ -26,22 +26,41 @@ leaked out of this folder and the guard test was bypassed.
 
 The reverse of the list above, and it is meant to stay this short.
 
-**Read again on 2026-09-15.** Jellyfin released 12.1 that morning, cut from a
-release branch, and `master` is still versioned 13.0.0 and still on `net10.0`. The
-two have diverged: `master` is 62 commits ahead of 12.1 and 148 behind it. Nothing
-publishes a `13.*` package, on NuGet or anywhere else. Jellyfin's old unstable feed
-on Azure DevOps answers, but its newest `Jellyfin.Controller` is `10.7.0-20200923`,
-so it has been dead for five years. **There is nothing to compile a `jf13` target
-against**, and a `manifest-jf13.json` would carry the same artifact as the 12 one.
+### Where Jellyfin publishes, which is three places and not one
 
-That last part is the thing worth knowing rather than guessing: `targetAbi` is a
-floor, not a target. `InstallationManager` keeps a version when
-`Version.Parse(x.TargetAbi) <= appVer`, so the `jf12` build, compiled against
-12.0.0 and on the same `net10.0` as `master`, is what a 13 server installs today.
-Adding a 13 target is worth doing when 13 breaks something, not when 13 exists.
+Getting this wrong is easy and was got wrong here on 2026-09-15, so it is written
+down rather than re-derived:
 
-`nuget-watch.yml` says so the day a package appears, including a release candidate,
-which is the moment a target becomes possible at all.
+- **Releases** go to nuget.org. `10.11.11`, `12.0.0`, `12.1.0`.
+- **Weekly builds of `master`** go to **GitHub Packages**,
+  `https://nuget.pkg.github.com/jellyfin/index.json`, versioned
+  `<major>.0.0-<timestamp>`. This is where a new line appears first, months before
+  nuget.org sees it. It refuses anonymous reads even though the package is public,
+  so it needs a token.
+- The old Azure DevOps feed still answers but its newest `Jellyfin.Controller` is
+  `10.7.0-20200923`. It did not die, it moved; reading it and concluding anything
+  is how the mistake above happened.
+
+`jellyfin/jellyfin-meta-plugins` is where the convention lives: it adds that feed
+as `jellyfin-pre`, keeps an `unstable` branch per plugin, and `unstable_plugins.py`
+opens a draft pull request moving each one onto the latest prerelease.
+
+### Jellyfin 13, as of 2026-09-15
+
+It exists, as exactly one package: **`13.0.0-20260914101923`**, published on
+2026-09-14 on GitHub Packages, replacing the `12.0.0-*` weeklies that ran there
+until 2026-09-07. `master` is versioned 13.0.0, still on `net10.0`, and still pins
+EF Core `10.0.11`, the same as 12.0 and 12.1. So a `jf13` target would differ from
+`jf12` by a package version and a `targetAbi` and nothing else, today.
+
+A target is therefore possible and not yet worth it. It would make an authenticated
+feed a requirement for anyone running `dotnet restore`, to chase a package that is
+replaced every week, for a server nobody runs in production. Add it when 13 breaks
+something, which is what `nuget-watch.yml` is for.
+
+Nothing is blocked in the meantime: `targetAbi` is a floor, not a target.
+`InstallationManager` keeps a version when `Version.Parse(x.TargetAbi) <= appVer`,
+so the `jf12` build is already what a 13 server installs.
 
 1. Add a `PropertyGroup` to `Directory.Build.props` for the new target, with its
    `TargetFramework`, `JellyfinVersion`, `JellyfinAbi`, `EfCoreVersion` and its
