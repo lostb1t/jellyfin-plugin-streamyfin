@@ -196,7 +196,15 @@ jobs:
           # A tag on this very commit means a previous attempt got at least this far, so
           # carry on and let the steps below finish what it started. A tag on a different
           # commit is a real collision and still stops here.
-          existing=$(git ls-remote --tags origin "refs/tags/$tag" | cut -f1)
+          # An annotated tag answers with the id of the tag object, not of the commit it
+          # points at; the commit only comes back on the peeled `^{}` line, which an exact
+          # query does not match. Ours are lightweight, so this changes nothing today, but
+          # a tag pushed by hand would otherwise read as a collision with itself.
+          existing=$(git ls-remote --tags origin "refs/tags/$tag*" | awk -v ref="refs/tags/$tag" '
+            $2 == ref { direct = $1 }
+            $2 == ref "^{}" { peeled = $1 }
+            END { print (peeled != "" ? peeled : direct) }
+          ')
           if [ -n "$existing" ] && [ "$existing" != "$SHA" ]; then
             echo "::error::$tag already exists and points at $existing, not at $SHA." >&2
             exit 1
