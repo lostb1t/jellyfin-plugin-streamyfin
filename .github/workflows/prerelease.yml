@@ -1,0 +1,220 @@
+name: "Publish an unstable build"
+
+# The stable channel only moves when a release is cut, which is the right cadence for
+# `main` and the wrong one for anybody who wants to try what is on `develop`. Today the
+# answer is "download the artifact from the pull request and drop the DLL over the one on
+# your server", which nobody does twice.
+#
+# This publishes a build of `develop` as a prerelease and writes it into its own pair of
+# manifests. A tester adds one repository URL and gets updates the ordinary way; nobody
+# pointed at the stable manifests ever sees these builds.
+#
+# Manual on purpose. A build on every push to `develop` would mean a GitHub release per
+# commit, most of them carrying nothing anyone asked to test.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or commit to build."
+        required: false
+        default: develop
+        type: string
+
+permissions:
+  contents: read
+
+# Two of these at once would race on the same tag and on the manifest commit to `main`.
+concurrency:
+  group: prerelease
+  cancel-in-progress: false
+
+jobs:
+  # Computed once and handed to every other job, the same reason as in release.yml: two
+  # jobs computing it separately can disagree if a commit lands between them, and here
+  # the number is a commit count, so they would disagree by exactly one.
+  version:
+    name: Compute version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.compute.outputs.version }}
+      sha: ${{ steps.compute.outputs.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "lts/*"
+
+      - id: compute
+        env:
+          CHANNEL: unstable
+        run: |
+          echo "version=$(node scripts/next-version.js)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: version
+    runs-on: ubuntu-latest
+    strategy:
+      # An unstable build that ships one line and not the other is worse than no build:
+      # the half that is missing is the half a tester would have found the problem in.
+      fail-fast: true
+      matrix:
+        target: [jf11, jf12]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.version.outputs.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "lts/*"
+
+      # The version is stamped into the assembly but never committed. On the stable
+      # channel that commit is what `main` carries between releases; an unstable build is
+      # not something `main` should claim to be.
+      - name: Stamp the version into the assembly
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: make update-version
+
+      - name: Test
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: make test JELLYFIN_TARGET=${{ matrix.target }}
+
+      - name: Build and package
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          CHANNEL: unstable
+        run: |
+          make build JELLYFIN_TARGET=${{ matrix.target }}
+          make zip JELLYFIN_TARGET=${{ matrix.target }}
+          make print JELLYFIN_TARGET=${{ matrix.target }}
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: streamyfin-unstable-${{ matrix.target }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  publish:
+    name: Publish
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      CHANNEL: unstable
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.version.outputs.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "lts/*"
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Show what will be published
+        run: |
+          ls -l dist
+          make print JELLYFIN_TARGET=jf12
+
+      # Tagged `unstable-<version>` rather than `<version>`. next-version.js finds the
+      # last release with `git describe --match '[0-9]*.[0-9]*'`, so a tag that looks
+      # like a release would become the base for the next count, the revision would
+      # restart near zero, and published versions would go backwards.
+      #
+      # REF and SHA come through the environment rather than being expanded into the
+      # script. An expression is substituted into the text before bash reads it, so a
+      # branch name containing $(...) would run here; through the environment it is a
+      # value bash never parses.
+      - name: Tag and release
+        env:
+          REF: ${{ inputs.ref }}
+          SHA: ${{ needs.version.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git config user.name 'streamyfin'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          tag="unstable-${VERSION}"
+
+          # The revision is a commit count, so dispatching twice against the same commit
+          # asks for a tag that already exists. Said here, where it is one line to read,
+          # rather than as a git failure after both targets have been built.
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
+            || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "::error::$tag already exists. This commit has already been published as an unstable build; there is nothing new to publish." >&2
+            exit 1
+          fi
+
+          git tag "$tag" "$SHA"
+          git push origin "refs/tags/$tag"
+
+          gh release create "$tag" dist/*.zip \
+            --title "Unstable ${VERSION}" \
+            --prerelease \
+            --verify-tag \
+            --notes "Built from \`${REF}\` at \`${SHA}\`. This is not a release: it is a build of work in progress, published so it can be tested on a real server. The stable channel is unaffected." \
+            --target "$SHA"
+
+      # The manifest is served from `main`, so that the URL a tester configures does not
+      # move when a branch does. It is read from `main` before being updated and written
+      # back to it, rather than regenerated: the entries already published live there,
+      # and the copy in this checkout is only the empty skeleton.
+      #
+      # Only that one file is committed. `main` keeps carrying the released plugin, and
+      # nothing from `develop` reaches it here.
+      - name: Update the unstable manifest on main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+
+          if git cat-file -e origin/main:manifest-unstable.json 2>/dev/null; then
+            git show origin/main:manifest-unstable.json > manifest-unstable.json
+            echo "Seeded manifest-unstable.json from main"
+          else
+            echo "manifest-unstable.json does not exist on main yet, starting from the skeleton in this branch"
+          fi
+
+          # Both lines into the one file. The writer sorts, so the order they are
+          # written in does not decide the order they end up in.
+          make update-manifest JELLYFIN_TARGET=jf11
+          make update-manifest JELLYFIN_TARGET=jf12
+
+          # Held outside the work tree across the branch switch. A stash would do the
+          # same thing with more ways to go wrong when the file is new on main.
+          cp manifest-unstable.json "$RUNNER_TEMP/manifest-unstable.json"
+
+          git checkout --force -B unstable-manifests origin/main
+          cp "$RUNNER_TEMP/manifest-unstable.json" manifest-unstable.json
+
+          git add manifest-unstable.json
+          git commit -m "unstable build: ${VERSION} manifest"
+          git push origin HEAD:main
