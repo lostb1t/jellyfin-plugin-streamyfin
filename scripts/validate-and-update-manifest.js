@@ -18,19 +18,18 @@ const tag = process.env.RELEASE_TAG || process.env.VERSION;
 // published manifest demanded a server three patches newer than necessary.
 const targetAbi = process.env.JELLYFIN_ABI;
 
-// One file per channel and per Jellyfin line, named by the Makefile. jf11 on the
-// stable channel keeps manifest.json so servers already configured with that URL
-// keep working; every other combination gets its own name, the same way the
-// JavaScript Injector plugin ships one manifest per Jellyfin line.
+// One file per channel, named by the Makefile. Every Jellyfin line shares it, which
+// is what manifest.json has always done: the entries on main already carry three
+// different targetAbi values between them.
 const manifestPath = `./${process.env.MANIFEST || 'manifest.json'}`;
 
 const dryRun = process.env.DRY_RUN === '1';
 
-// How many entries the manifest keeps. A release manifest keeps every version it ever
+// How many versions the manifest keeps. A release manifest keeps every version it ever
 // published, because somebody may want to pin an old one, so unset means keep everything
 // and the stable channel never sets it. An unstable manifest has no such claim on
 // anyone: its entries point at prereleases that exist to be replaced, and left unpruned
-// the file gains one entry per build forever.
+// the file grows with every build.
 const keep = (() => {
     const raw = (process.env.MANIFEST_KEEP || '').trim();
     if (!raw) return null;
@@ -81,7 +80,8 @@ async function updateManifest() {
     // Trimming drops builds nobody can reach any more. The release they point at stays on
     // GitHub, only the manifest stops offering it.
     if (dropped.length > 0) {
-        console.log(`Keeping the newest ${keep}, dropping ${dropped.map((v) => v.version).join(', ')}`);
+        const versions = [...new Set(dropped.map((v) => v.version))];
+        console.log(`Keeping the newest ${keep} versions, dropping ${versions.join(', ')}`);
     }
 
     const updated = JSON.stringify(jsonData, null, 4);

@@ -49,29 +49,58 @@ function compare(a, b) {
  * @returns {{newLines: string[], newerInLine: string[], newest: string}}
  */
 function classify(published, built) {
-    const builtVersions = built.map(parse).filter(Boolean);
-    if (builtVersions.length === 0) {
-        throw new Error('No Jellyfin version found in Directory.Build.props.');
+    const builtVersions = built.map(parse);
+
+    // A value that does not parse stops the watch rather than being skipped. Skipping it
+    // drops a line out of the known set, and the report would then announce a line this
+    // repository builds against as one that needs a new target.
+    if (builtVersions.length === 0 || builtVersions.some((v) => v === null)) {
+        throw new Error(`Directory.Build.props does not declare readable Jellyfin versions: ${built.join(', ') || 'none found'}`);
     }
 
     const newest = builtVersions.reduce((a, b) => (compare(a, b) >= 0 ? a : b));
-    const builtMajors = new Set(builtVersions.map((v) => v.numbers[0]));
 
-    const ahead = published
-        .map(parse)
-        .filter(Boolean)
-        .filter((v) => compare(v, newest) > 0)
+    // The floor of each line, separately. Comparing every published version against the
+    // single newest built one is what the first version of this did, and it hid a new
+    // release of an older line: with 10.11.9 and 12.0.0 built, a published 10.12.0 is
+    // below 12.0.0 and was discarded, although it is news for the line it belongs to.
+    const floors = new Map();
+    for (const version of builtVersions) {
+        const major = version.numbers[0];
+        const known = floors.get(major);
+        if (!known || compare(version, known) > 0) floors.set(major, version);
+    }
+
+    const parsed = published.map(parse).filter(Boolean);
+
+    // A major older than everything built here is a line that was dropped on purpose,
+    // not news, so the newest built major is what decides whether an unknown line counts.
+    const newLines = parsed
+        .filter((v) => !floors.has(v.numbers[0]) && v.numbers[0] > newest.numbers[0])
+        .sort(compare);
+
+    // Compared on the minor and not on the patch. The floor of a line is deliberately
+    // old, 10.11.9 rather than 10.11.11, so every patch above it is expected and
+    // permanent: reporting those means saying the same thing every day about a decision
+    // that was already taken. A new minor is a different matter, and 12.1.0 arriving on
+    // 2026-09-15 is the case this was rewritten for.
+    const newerInLine = parsed
+        .filter((v) => {
+            const floor = floors.get(v.numbers[0]);
+            if (!floor) return false;
+            return v.numbers[1] > floor.numbers[1];
+        })
         .sort(compare);
 
     return {
         // A line nobody here builds against. This is the one that needs a new target,
         // and the procedure for it is in Compat/README.md.
-        newLines: ahead.filter((v) => !builtMajors.has(v.numbers[0])).map((v) => v.raw),
+        newLines: newLines.map((v) => v.raw),
 
         // A newer version of a line already built. Usually nothing to do, since the
         // reference is a floor and a newer server satisfies it, but it is the moment to
         // check the host's EF Core pin and whether anything the plugin uses moved.
-        newerInLine: ahead.filter((v) => builtMajors.has(v.numbers[0])).map((v) => v.raw),
+        newerInLine: newerInLine.map((v) => v.raw),
 
         newest: newest.raw,
     };

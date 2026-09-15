@@ -44,21 +44,22 @@ export FILE := streamyfin-$(VERSION)-$(JELLYFIN_TARGET).zip
 # ambiguous, and the manifest's sourceUrl is built from this.
 export RELEASE_TAG = $(if $(filter unstable,$(CHANNEL)),unstable-$(VERSION),$(VERSION))
 
-# One manifest per channel and per Jellyfin line, four files rather than two. Two
-# builds cannot share a manifest: they carry the same version with a different
-# targetAbi, so they collide on the version key and the deduplication in
-# validate-and-update-manifest.js keeps only whichever was written last.
+# One manifest per channel, and only per channel. Every Jellyfin line shares a file,
+# which is what manifest.json has always done: the 62 entries on main carry three
+# different targetAbi values between them.
 #
-# jf11 on the stable channel keeps manifest.json rather than gaining a suffix, so
-# servers already pointed at that URL keep working.
-MANIFEST_SUFFIX = $(if $(filter jf12,$(JELLYFIN_TARGET)),-jf12,)
-export MANIFEST = $(if $(filter unstable,$(CHANNEL)),manifest-unstable$(MANIFEST_SUFFIX).json,manifest$(MANIFEST_SUFFIX).json)
+# It works because targetAbi is a floor. A 10.11 server drops the jf12 entry and is
+# left with the jf11 one; a 12 server keeps both and takes the jf12 one, because the
+# writer sorts a shared version by targetAbi descending and the server's sort is
+# stable. So a server that moves from 10.11 to 12 is offered the right build without
+# anyone editing the URL they configured, which one file per line could never do.
+export MANIFEST = $(if $(filter unstable,$(CHANNEL)),manifest-unstable.json,manifest.json)
 
-# A release manifest keeps every version it ever published, because somebody may
-# want to pin an old one. An unstable manifest has no such claim on anyone: its
-# entries point at prereleases that exist to be replaced, and left unpruned the
-# file grows by one entry per build forever. Unset means keep everything, which is
-# what the stable channel wants.
+# How many versions the manifest keeps, counted in versions rather than entries,
+# since one version is now two entries. A release manifest keeps every version it
+# ever published, because somebody may want to pin an old one. An unstable manifest
+# has no such claim on anyone: its entries point at prereleases that exist to be
+# replaced, and left unpruned the file grows with every build.
 export MANIFEST_KEEP = $(if $(filter unstable,$(CHANNEL)),10,)
 
 print:

@@ -149,55 +149,72 @@ jobs:
       # last release with `git describe --match '[0-9]*.[0-9]*'`, so a tag that looks
       # like a release would become the base for the next count, the revision would
       # restart near zero, and published versions would go backwards.
+      #
+      # REF and SHA come through the environment rather than being expanded into the
+      # script. An expression is substituted into the text before bash reads it, so a
+      # branch name containing $(...) would run here; through the environment it is a
+      # value bash never parses.
       - name: Tag and release
+        env:
+          REF: ${{ inputs.ref }}
+          SHA: ${{ needs.version.outputs.sha }}
         run: |
           set -euo pipefail
           git config user.name 'streamyfin'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
           tag="unstable-${VERSION}"
-          git tag "$tag" "${{ needs.version.outputs.sha }}"
+
+          # The revision is a commit count, so dispatching twice against the same commit
+          # asks for a tag that already exists. Said here, where it is one line to read,
+          # rather than as a git failure after both targets have been built.
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
+            || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "::error::$tag already exists. This commit has already been published as an unstable build; there is nothing new to publish." >&2
+            exit 1
+          fi
+
+          git tag "$tag" "$SHA"
           git push origin "refs/tags/$tag"
 
           gh release create "$tag" dist/*.zip \
             --title "Unstable ${VERSION}" \
             --prerelease \
             --verify-tag \
-            --notes "Built from \`${{ inputs.ref }}\` at \`${{ needs.version.outputs.sha }}\`. This is not a release: it is a build of work in progress, published so it can be tested on a real server. The stable channel is unaffected." \
-            --target "${{ needs.version.outputs.sha }}"
+            --notes "Built from \`${REF}\` at \`${SHA}\`. This is not a release: it is a build of work in progress, published so it can be tested on a real server. The stable channel is unaffected." \
+            --target "$SHA"
 
-      # The manifests are served from `main`, so that the URL a tester configures does
-      # not move when a branch does. They are read from `main` before being updated and
-      # written back to it, rather than being regenerated: the entries already published
-      # live there, and the copies in this checkout are only the empty skeletons.
+      # The manifest is served from `main`, so that the URL a tester configures does not
+      # move when a branch does. It is read from `main` before being updated and written
+      # back to it, rather than regenerated: the entries already published live there,
+      # and the copy in this checkout is only the empty skeleton.
       #
-      # Only the two unstable files are committed. `main` keeps carrying the released
-      # plugin, and nothing from `develop` reaches it here.
-      - name: Update the unstable manifests on main
+      # Only that one file is committed. `main` keeps carrying the released plugin, and
+      # nothing from `develop` reaches it here.
+      - name: Update the unstable manifest on main
         run: |
           set -euo pipefail
           git fetch origin main
 
-          for f in manifest-unstable.json manifest-unstable-jf12.json; do
-            if git cat-file -e "origin/main:$f" 2>/dev/null; then
-              git show "origin/main:$f" > "$f"
-              echo "Seeded $f from main"
-            else
-              echo "$f does not exist on main yet, starting from the skeleton in this branch"
-            fi
-          done
+          if git cat-file -e origin/main:manifest-unstable.json 2>/dev/null; then
+            git show origin/main:manifest-unstable.json > manifest-unstable.json
+            echo "Seeded manifest-unstable.json from main"
+          else
+            echo "manifest-unstable.json does not exist on main yet, starting from the skeleton in this branch"
+          fi
 
+          # Both lines into the one file. The writer sorts, so the order they are
+          # written in does not decide the order they end up in.
           make update-manifest JELLYFIN_TARGET=jf11
           make update-manifest JELLYFIN_TARGET=jf12
 
           # Held outside the work tree across the branch switch. A stash would do the
-          # same thing with more ways to go wrong when one of the two files is new.
-          mkdir -p "$RUNNER_TEMP/manifests"
-          cp manifest-unstable.json manifest-unstable-jf12.json "$RUNNER_TEMP/manifests/"
+          # same thing with more ways to go wrong when the file is new on main.
+          cp manifest-unstable.json "$RUNNER_TEMP/manifest-unstable.json"
 
           git checkout --force -B unstable-manifests origin/main
-          cp "$RUNNER_TEMP/manifests/"manifest-unstable*.json .
+          cp "$RUNNER_TEMP/manifest-unstable.json" manifest-unstable.json
 
-          git add manifest-unstable.json manifest-unstable-jf12.json
-          git commit -m "unstable build: ${VERSION} manifests"
+          git add manifest-unstable.json
+          git commit -m "unstable build: ${VERSION} manifest"
           git push origin HEAD:main

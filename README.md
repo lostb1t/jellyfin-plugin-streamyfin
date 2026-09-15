@@ -77,19 +77,18 @@ Tailor the library experience:
 1. Open **Jellyfin Dashboard** → **Plugins** → **Catalog**
 2. Click the **⚙️ Settings icon** (next to "Catalog" title)
 3. Click **➕ Add** to add a new repository
-4. Enter the repository URL **for your Jellyfin version**:
-
-   | Your Jellyfin | Repository URL |
-   |---|---|
-   | 10.11.9 and later | `https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest.json` |
-   | 12.0 and later | `https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-jf12.json` |
-
+4. Enter the repository URL:
+   ```
+   https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest.json
+   ```
 5. Go back to **Catalog** and search for **"Streamyfin"**
 6. Click **Install**
 7. **Restart Jellyfin** to complete installation
 
-Adding the wrong one is not dangerous: a server only offers a build whose
-`targetAbi` it accepts, so the catalogue simply lists nothing.
+One URL for every supported server. The plugin is built twice, once for Jellyfin
+10.11 and once for Jellyfin 12, and both builds are listed in that file; your server
+picks the one it can run and never sees the other. Upgrading your server from 10.11
+to 12 needs nothing changed here, and the next update is simply the right build.
 
 ### Method 2: Manual Installation
 
@@ -123,6 +122,11 @@ manual install has one more step than it looks.
    }
    ```
 
+   That is the `-jf12` file. For `-jf11`, the same line reads
+   `"targetAbi": "10.11.9.0"`. Declaring an ABI higher than your server has it
+   refuse the plugin, which is what copying this one unchanged onto a 10.11 server
+   would do.
+
 5. **Restart Jellyfin**
 
 > **Jellyfin 10.11.9 or later, or Jellyfin 12.** 10.11.9 is the floor for the
@@ -137,12 +141,11 @@ released. These are builds of the `develop` branch: they are not a release, they
 have not been through a release's checks, and one of them can break something the
 last release did correctly.
 
-Add the URL for your Jellyfin line, the same way as above:
+Add this URL the same way as above, beside the one you already have:
 
-| Your Jellyfin | Repository URL |
-|---|---|
-| 10.11.9 and later | `https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-unstable.json` |
-| 12.0 and later | `https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-unstable-jf12.json` |
+```
+https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest-unstable.json
+```
 
 An unstable build is numbered above the release it follows: after 0.68.1.0 they are
 0.68.1.1, 0.68.1.2 and so on, counting commits. The next release, 0.69.0.0, is above

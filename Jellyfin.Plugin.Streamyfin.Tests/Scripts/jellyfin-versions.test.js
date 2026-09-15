@@ -44,6 +44,12 @@ describe("reading what the build targets", () => {
     test("a file with none of them stops the watch rather than reporting everything", () => {
         expect(() => classify(["12.0.0"], builtVersionsFrom("<Project></Project>"))).toThrow();
     });
+
+    // Skipping it would drop a line out of the known set, and the report would then
+    // announce a line this repository builds against as one that needs a new target.
+    test("a declaration that is not a version stops the watch too", () => {
+        expect(() => classify(["12.0.0"], ["10.11.9", "not-a-version"])).toThrow();
+    });
 });
 
 describe("classifying what is published", () => {
@@ -58,11 +64,27 @@ describe("classifying what is published", () => {
 
     // The one the shell version missed. 12.1.0 was published and nothing said anything,
     // because 12 was already a known major.
-    test("a newer version inside a line already built is reported", () => {
+    test("a newer minor inside a line already built is reported", () => {
         const { newLines, newerInLine } = classify(["12.0.0", "12.1.0"], built);
 
         expect(newLines).toEqual([]);
         expect(newerInLine).toEqual(["12.1.0"]);
+    });
+
+    // Comparing against the single newest built version, 12.0.0, put this below it and
+    // discarded it, although it is a new minor of a line this repository builds.
+    test("a newer minor of the older line is not hidden by the newer line", () => {
+        expect(classify(["10.12.0"], built).newerInLine).toEqual(["10.12.0"]);
+    });
+
+    // The floor of a line is deliberately old: 10.11.9 rather than 10.11.11, because
+    // that is the oldest server the plugin actually uses. Reporting every patch above it
+    // means repeating a decision that was already taken, every day.
+    test("a patch above a deliberate floor is not news", () => {
+        const { newLines, newerInLine } = classify(["10.11.10", "10.11.11"], built);
+
+        expect(newLines).toEqual([]);
+        expect(newerInLine).toEqual([]);
     });
 
     test("a line nobody builds against is reported apart, since it needs a new target", () => {

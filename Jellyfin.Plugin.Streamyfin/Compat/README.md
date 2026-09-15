@@ -15,9 +15,9 @@ domain is exactly what makes old runtimes impossible to retire.
 2. Delete the `jf11` entry from the `build.yml`, `release.yml` and
    `prerelease.yml` matrices.
 3. Delete every `#if JF11` branch in this folder, keeping the `JF12` side.
-4. Drop the 10.11 manifests, `manifest.json` and `manifest-unstable.json`, and
-   stop publishing that artifact. `manifest.json` is the URL the oldest servers
-   were told to use, so it is the one file here that cannot simply be renamed.
+4. Stop publishing that artifact. The manifests need no change: dropping the
+   entries a line produced happens by not writing new ones, and the old entries
+   stay readable for anyone pinning a version.
 
 Nothing else in the codebase should need to change. If it does, something
 leaked out of this folder and the guard test was bypassed.
@@ -50,15 +50,35 @@ which is the moment a target becomes possible at all.
    `IUserManager.Users` became `GetUsers()` inside that patch line.
 2. Add it to the matrices in `build.yml`, `release.yml` and `prerelease.yml`,
    with the SDK it needs.
-3. Give it its own manifest file names. The `Makefile` builds them from the
-   channel and the target, so a new line needs a `manifest-jfNN.json` and a
-   `manifest-unstable-jfNN.json` created beside the others, and the suffix falls
-   out of `MANIFEST_SUFFIX`. The oldest line keeps `manifest.json` with no suffix,
-   so servers already pointed at that URL do not break. Two builds cannot share a
-   manifest: they carry the same version with a different `targetAbi`, and the
-   deduplication in `validate-and-update-manifest.js` would keep only one.
+3. Nothing, for the manifests. There are two files, one per channel, and every
+   line shares them, so a new target writes into the same `manifest.json` that
+   10.11 and 12 already write into. See the note below for why that works.
 4. Build both. Anything that fails to compile is a real difference, and it goes
    in this folder behind `#if`, not where it was found.
+
+## One manifest, every line
+
+`manifest.json` carries an entry per Jellyfin line, and always has: the 62 entries
+on `main` hold three different `targetAbi` values between them. #126 split it into a
+file per line and that was the wrong shape, because it made a server upgrade into a
+configuration change: a user moving from 10.11 to 12 had to know that the URL they
+pasted a year ago was now the wrong one, and nobody does that.
+
+It works because `targetAbi` is a floor. `InstallationManager` keeps a version when
+`Version.Parse(x.TargetAbi) <= appVer` and then takes the first of what is left, so:
+
+- a 10.11 server drops the `jf12` entry on the ABI check and installs the `jf11` one
+- a 12 server keeps both and installs the `jf12` one, because it is written first
+
+That second line is the part with a rule behind it. `validate-and-update-manifest.js`
+sorts by version descending and then by `targetAbi` descending, so among entries
+sharing a version the highest ABI is always written above the others. The server's own
+sort, `Enumerable.OrderByDescending`, is documented as stable, so it preserves that
+order for entries whose version compares equal. `manifest-versions.test.js` is what
+holds the writer to it, from both publishing orders.
+
+The consequence for a new line: it needs no new file, and it will be preferred on a
+server that can run it for the same reason `jf12` is today.
 
 Two things that are worth checking before assuming a target is only a version
 number, because both bit this plugin on the 10.11 to 12 move:
