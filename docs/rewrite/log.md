@@ -922,3 +922,96 @@ not read.
 
 The app side work that came out of it is tracked in
 [app-side-work.md](app-side-work.md).
+
+## 2026-09-15, the unstable channel, and four things that were wrong
+
+### Loaded on a real server, at last
+
+The load test this dossier has been deferring since 2026-08-25 is done. The whole
+of `develop`, built as `jf12`, on the beta running **Jellyfin 13.0.0**: no load
+error, nothing of its own in the log, the four satellite assemblies loaded, the
+drawer logo registered with File Transformation.
+
+The database half is the part that was really waiting, and it reads better than a
+fixture ever could. Four EF migrations applied. `ImportMarkers` holds
+`legacy-device-tokens` with 34 rows imported on 2026-08-25 and `legacy-global-config`
+with 1. The old `streamyfin_plugin.db` still holds exactly those 34 rows and is dated
+May, so it has not been written to since. The new table holds 37 across 20 users, so
+three devices have registered through EF since. That is the P0.4 contract, read off
+production data.
+
+### The channel
+
+`develop` is the unstable channel and `main` is the stable one, and that is now in
+the plumbing rather than in a convention. `prerelease.yml` publishes a build of
+`develop` as a prerelease and writes it into `manifest-unstable.json`.
+
+Numbering was the decision worth taking care over. An unstable build is numbered
+**above the release it follows**, 0.68.1.1 upwards counting commits, rather than
+below the one it is heading towards. Jellyfin updates a plugin by comparing versions
+and nothing else, so the tempting scheme strands the tester: on 0.69.0.5 they would
+never be offered the 0.69.0.0 that eventually ships. This way, removing the URL is
+the whole way back.
+
+The first build, `0.68.1.59`, is published, installed on the beta from the
+catalogue, and loaded. The beta tracks the channel from here.
+
+### One manifest, not one per line
+
+#126 gave each Jellyfin line a manifest of its own and that was the wrong shape: it
+turns a server upgrade into a configuration change, since somebody moving from 10.11
+to 12 has to know the URL they pasted a year ago is now the wrong one. #165 collapses
+it to one file per channel, which is what `manifest.json` always did anyway, its 62
+entries carrying three different `targetAbi` values between them.
+
+Checked on the live Jellyfin 13.0.0 rather than argued: an entry with `targetAbi`
+99.0.0.0 is dropped by the server, and two entries sharing a version both survive
+with the higher ABI listed first, which is the order the writer produces and the one
+the install path depends on.
+
+### Four things that were written down and were not true
+
+Worth recording as a class, because they were all reached the same way: by checking
+one source and concluding.
+
+**No Jellyfin 13 package exists.** It does. `13.0.0-20260914101923`, published
+2026-09-14 on GitHub Packages, `https://nuget.pkg.github.com/jellyfin/index.json`,
+which is where the weekly builds of `master` go and where a new line appears first by
+months. nuget.org and the abandoned Azure DevOps feed had been checked; that third
+one had not. `nuget-watch.yml` read only nuget.org too, so the watch that exists to
+catch exactly this would never have said a word. It reads both now.
+
+**Jellyfin refuses a plugin folder with no `meta.json`.** It does not.
+`PluginManager.LoadManifest` falls back to the folder name and returns the plugin as
+supported. The real consequence is worse: the id becomes the MD5 of the folder name,
+so the server never matches it to the catalogue entry and the plugin never receives
+an update again.
+
+**The app is missing "Landscape auto" in one of its two orientation pickers.** The
+second picker, `OtherSettings.tsx`, is dead code, orphaned since #1178 and imported
+by nothing. The live one has offered it since January. The issue body said so all
+along: the reporter wrote that the app has the option and the plugin does not. A pull
+request had already been opened on the app repository before anyone read that
+sentence; it is closed.
+
+**No scheduled run has ever happened in this repository.** `runs schedule: 0`.
+`security.yml` and `housekeeping.yml` had ten runs each, all of them pushes. GitHub
+fires `schedule` and `workflow_dispatch` only from the default branch and these lived
+on `develop`, so the weekly CodeQL scan, the stale sweep and the NuGet watch had been
+decorative since the day they were written. #168 puts the four that need it on `main`.
+
+### #81, picked up
+
+The Seerr webhook, open since 2025-11-18 with no review, whose author said on
+2026-09-01 that they no longer had the bandwidth. Ported rather than rebased, since
+the branch predates EF Core, the settings model and the rename.
+
+Three things changed from what it proposed: it is Seerr everywhere; the payload is
+not logged, since Seerr sends the requester's email and Discord id beside their
+username; and an event naming no requester goes to administrators rather than
+producing the target-nobody combination that makes the endpoint send to every device
+on the server.
+
+Verified end to end on the beta: 401 without a key, 202 on an issue event, and a
+`MEDIA_APPROVED` that reached one iPhone, in French, with the deliberately planted
+email appearing nowhere in the log.

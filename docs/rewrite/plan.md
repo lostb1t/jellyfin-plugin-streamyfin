@@ -350,6 +350,10 @@ Everything merged below is on `develop`, which reaches `main` through
 | P3.4 | [#162](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/162) | this |
 | P5.1, P5.5 | [#157](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/157) | merged |
 | P5.2 | [#151](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/151) for bounds, [#157](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/157) for sections | merged |
+| P0.7 corrected | [#165](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/165) | merged. One manifest per channel, not per Jellyfin line, plus the unstable channel |
+| #110 | [#167](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/167) | merged |
+| P4.4 groundwork | [#166](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/166) | merged. The Seerr webhook from #81, ported |
+| — | [#168](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/168) | merged onto `main`, so the scheduled and dispatchable workflows can fire at all |
 
 Not a numbered sub part, landed alongside P1:
 [#130](https://github.com/streamyfin/jellyfin-plugin-streamyfin/pull/130), the
